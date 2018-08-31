@@ -1,0 +1,23 @@
+﻿
+***************************************************************
+FASE 1		GAMIFICAÇÃO
+***************************************************************
+RESPONSÁVEL	TAREFA					STATUS
+
+SilvioDaCol	RETIRAR EXPLOSÕES			PENDENTE
+SilvioDaCol	ATRELAR OBSTÁCULOS AO BACK GROUND	PENDENTE
+phbeluci	CRIAR TÚNEIS				CONCLUÍDO
+phbeluci	SUBSTITUIR IMAGENS			PENDENTE
+phbeluci	REPROGRAMAR POSICIONAMENTO DOS TÚNEIS	PENDENTE
+
+***************************************************************
+
+
+***************************************************************
+FASE 2		APRESENTAÇÃO NO CONGRESSO
+***************************************************************
+RESPONSÁVEL	TAREFA				STATUS
+		
+A DEFINIR	PRODUÇÃO DO BANNER		PENDENTE
+***************************************************************
+	

@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1528402815 source:c:\users\silvio\documents\google drive\carreira\cursos\software\curso_git\congresso_conept\desenvolvimento\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	<time.h>
+	<locale.h>
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_native_dialog.h>
+	<stdbool.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_ttf.h>
+	<locale.h>
+
