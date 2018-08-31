@@ -101,6 +101,7 @@ Objeto ultimaChance;
 
 
 //Declara e inicializa Variaveis de controle do jogo
+char ultChTexto[10];
 bool sair = 0;
 bool pause = 0;
 bool jogoSalvo = 0;
@@ -532,10 +533,10 @@ void resetJogo(){
     //Declara e inicializa Variaveis com a posição X dos objetos
     backGround.posX=0;
     nave.posX = 100;
-    obst.posX = (rand()% TELA_LARGURA*1.5) + 3000;
-    obst2.posX = (rand()% TELA_LARGURA*1.5) + 3000;
-    obst3.posX = (rand()% TELA_LARGURA*1.5) + 3000;
-    obst4.posX = (rand()% TELA_LARGURA*1.5) + 3000;
+    obst.posX = backGround.posX + TELA_LARGURA;
+    obst2.posX = backGround.posX + TELA_LARGURA;
+    obst3.posX = backGround.posX + TELA_LARGURA;
+    obst4.posX = backGround.posX + TELA_LARGURA;
     explo.posX = 4000;
     vilao.posX = 2500;
     vida1.posX = 1600;
@@ -547,10 +548,10 @@ void resetJogo(){
 
     //Declara e inicializa Variaveis com a posição Y dos objetos
     backGround.posY=0;
-    obst.posY = (rand()% 250) + al_get_bitmap_height(obst4.objetoBitmap);
-    obst2.posY = (rand()% 500) + 270 ;
-    obst3.posY = (rand()% 790) + 540 ;
-    obst4.posY = (rand()% (TELA_ALTURA-al_get_bitmap_height(obst4.objetoBitmap))) + 810 ;
+    obst.posY = 1*(TELA_ALTURA/5);
+    obst2.posY = 2*(TELA_ALTURA/5);
+    obst3.posY = 3*(TELA_ALTURA/5);
+    obst4.posY = 4*(TELA_ALTURA/5) ;
     explo.posY = 4000;
     vilao.posY = 100;
     vida1.posY = 10;
@@ -1022,10 +1023,10 @@ void drawTelaJogo (){
     if(plusScore.ativo)al_draw_rotated_bitmap(plusScore.objetoBitmap, (al_get_bitmap_width(plusScore.objetoBitmap))/4, (al_get_bitmap_height(plusScore.objetoBitmap))/5, plusScore.posX, plusScore.posY,plusScore.ang,0);
     if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(rTime, gTime, bTime), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE: %i",somaScore*progressao);
     if(textTime.ativo)al_draw_textf(textTime.objetoFont, al_map_rgb(rTime, gTime, bTime), 20 , 10, ALLEGRO_ALIGN_LEFT, "TIME: %i",TEMPO_JOGO_SEGUNDOS - (tempJogo/FPS));
-    if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(rTime, gTime, bTime), ultimaChance.posX-150, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, "!!ULTIMA CHANCE!!");
+    if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(rTime, gTime, bTime), ultimaChance.posX-150, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
 }
 void telaJogo(){//----------------------------------------------------FUNCAO RESPONSALVEL PELO JOGO
-    int i;
+    int i,r;
 
     if(posColisao<120){//---------------------------------------------PAUSA APOS OCORRENCIA DE COLISAO(JOGO INATIVO)
         //------------------------------------------------------------MANTEM BACKGROUND EM MOVIMENTO
@@ -1058,19 +1059,13 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         nave.posY = 500;
 
     }else{//----------------------------------------------------------ROTINA DO JOGO ATIVO
-        //------------------------------------------------------------TRATAMENTO DA PROGRESSÃO DE VELOCIDADE DO JOGO
-        //PROGRESSÃO
-        if (score >= 10){
-            nave.vel *= 1.08;
-            progressao += 5;
-            score = 0;
-        }
 
         //------------------------------------------------------------TRATAMENTO DAS POSIÇÕES E VELOCIDADES(TODOS OS OBJETOS)
         //Posicionamento do background (VELOCIDADE DA NAVE)
         backGround.posX -= nave.vel*0.7;
         if(backGround.posX<=(TELA_LARGURA*-2)){
             backGround.posX=0;
+            r = 0;
         }
          //Posicionamento Vilao
         vilao.posX -= vilao.vel+nave.vel;
@@ -1095,143 +1090,36 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
             plusScore.vel = (rand()% 2) + 1;
         }
         //Posicionamento do obst
-        obst.ang+=0.0349066;
-        obst.posX -= (obst.vel+nave.vel);
-        if(obst.posX<-50){
-            obst.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst.posY = (rand()% 250) + 0;
-            obst.vel = rand()% 7 + 1;
-            score ++;
-            somaScore ++;
-        }
+        obst.posX = backGround.posX + TELA_LARGURA;
+
         //Posicionamento do obst2
-        obst2.ang-=0.0349066;
-        obst2.posX -= (obst2.vel+nave.vel);
-        if(obst2.posX<-50){
-            obst2.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst2.posY = (rand()% 500) + 270;
-            obst2.vel = rand()% 7 + 1;
-            score ++;
-            somaScore ++;
-        }
+        obst2.posX = backGround.posX + TELA_LARGURA;
+
         //Posicionamento do obst3
-        obst3.ang+=0.0349066;
-        obst3.posX -= (obst3.vel+nave.vel);
-        if(obst3.posX<-50){
-            obst3.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst3.posY = (rand()% 790) + 540;
-            obst3.vel = rand()% 7 + 1;
-            score ++;
-            somaScore ++;
-        }
-        obst4.ang+=0.0349066;
-        obst4.posX -= (obst4.vel+nave.vel);
-        if(obst4.posX<-50){
-            obst4.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst4.posY = (rand()% 1080) + 810;
-            obst4.vel = rand()% 7 + 1;
-            score ++;
-            somaScore ++;
-        }
-        //Posicionamento do tiro
-        if((caracter==' ')&&(caracterPendente)){
-            disparo = 1;
-            limitTiro++;
-            if(limitTiro>=NUM_TIROS)limitTiro=0;
-            caracterPendente = 0;
-        }
+        obst3.posX = backGround.posX + TELA_LARGURA;
 
-
-        for(i=0;i<NUM_TIROS;i++){
-            tiro[i].posX += tiro[i].vel;
-            if (tiro[i].posX>= TELA_LARGURA)tiro[i].ativo=false;
-            if((disparo)&&(limitTiro==i)){
-                if (tiro[limitTiro].ativo==false){
-                    tiro[limitTiro].posX = nave.posX;
-                    tiro[limitTiro].posY = nave.posY-30;
-                    tiro[limitTiro].ativo = true;
-                    disparo = 0;
-                }
-            }
-        }
+        //Posicionamento do obst4
+        obst4.posX = backGround.posX + TELA_LARGURA;
 
 
         //------------------------------------------------------------TRATAMENTO DAS COLISÕES
         if (colisao(nave,obst)){
-            tempExploNave = 0;
-            explo.posX = nave.posX;
-            explo.posY = nave.posY - (explo.altura/2);
-            nave.posY = 6000;
-            nave.posX = 6000;
-            obst.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst.posY = (rand()% 400) + 100;
-            plusTime.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            vidas --;
-            plusTime.posX = 5000;
-            plusScore.posX = -1000;
-            for(i=0;i<NUM_TIROS;i++){
-                tiro[i].ativo=false;
-            }
+            strcpy(ultChTexto,"TUNEL 1");
+            ultimaChance.ativo = true;
 
-            estadoNave++;
-            if(estadoNave>2)estadoNave=2;
-            nave.objetoBitmap=naveImagem[tipoNave][estadoNave];
         }else if (colisao(nave,obst2)){
-            tempExploNave = 0;
-            explo.posX = nave.posX;
-            explo.posY = nave.posY - (explo.altura/2);
-            nave.posY = 6500;
-            nave.posX = 7000;
-            obst2.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst2.posY = (rand()% 800) + 450;
-            plusTime.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            vidas --;
-            plusTime.posX = 5000;
-            plusScore.posX = -1000;
-            for(i=0;i<NUM_TIROS;i++){
-                tiro[i].ativo=false;
-            }
+            strcpy(ultChTexto,"TUNEL 2");
+            ultimaChance.ativo = true;
 
-            estadoNave++;
-            if(estadoNave>2)estadoNave=2;
-            nave.objetoBitmap=naveImagem[tipoNave][estadoNave];
         }else if (colisao(nave,obst3)){
-            tempExploNave = 0;
-            explo.posX = nave.posX;
-            explo.posY = nave.posY - (explo.altura/2);
-            nave.posY = 6000;
-            nave.posX = 6000;
-            obst3.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst3.posY = (rand()% TELA_ALTURA-obst3.altura) + 700;
-            plusTime.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            plusScore.posX = -1000;
-            vidas --;
-            for(i=0;i<NUM_TIROS;i++){
-                tiro[i].ativo=false;
-            }
+            strcpy(ultChTexto,"TUNEL 3");
+            ultimaChance.ativo = true;
 
-            estadoNave++;
-            if(estadoNave>2)estadoNave=2;
-            nave.objetoBitmap=naveImagem[tipoNave][estadoNave];
         }else if (colisao(nave,obst4)){
-            tempExploNave = 0;
-            explo.posX = nave.posX;
-            explo.posY = nave.posY - (explo.altura/2);
-            nave.posY = 6000;
-            nave.posX = 6000;
-            obst4.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst4.posY = (rand()% TELA_ALTURA-obst4.altura) + 700;
-            plusTime.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            plusScore.posX = -1000;
-            vidas --;
-            for(i=0;i<NUM_TIROS;i++){
-                tiro[i].ativo=false;
-            }
-
-            estadoNave++;
-            if(estadoNave>2)estadoNave=2;
-            nave.objetoBitmap=naveImagem[tipoNave][estadoNave];
+            strcpy(ultChTexto,"TUNEL 4");
+            ultimaChance.ativo = true;
         }
+
         if (colisao(nave,plusTime)){
             tempJogo = tempJogo - 120;
             plusTime.posY = (rand()% 1000) + 100;
@@ -1242,69 +1130,6 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
             plusScore.posY = (rand()% 1000) + 100;
             plusScore.posX = (rand()% TELA_LARGURA*1.5) + 2000;
         }
-
-        //-----------------------------------------------------------------COLISÕES TIROS
-
-
-        for(i=0;i<NUM_TIROS;i++){
-            if (colisao(tiro[i],obst)){
-                exploObj.posX = obst.posX;
-                exploObj.posY = obst.posY - exploObj.altura - obst.altura/2;
-                exploObj.ativo = true;
-                exploObj.temp = 0;
-                obst.posX = (rand()% TELA_LARGURA) + TELA_LARGURA*1.5;
-                obst.posY = (rand()% 400) + 100;
-                tiro[i].posY = 10000;
-                tiro[i].ativo = false;
-                score ++;
-                somaScore ++;
-
-            }else if (colisao(tiro[i],obst2)){
-                exploObj.posX = obst2.posX;
-                exploObj.posY = obst2.posY - exploObj.altura - obst2.altura/2;
-                exploObj.ativo = true;
-                exploObj.temp = 0;
-                obst2.posX = (rand()% TELA_LARGURA) + TELA_LARGURA*1.5;
-                obst2.posY = (rand()% 400) + 100;
-                tiro[i].posY = 10000;
-                tiro[i].ativo = false;
-                score ++;
-                somaScore ++;
-
-            }else if (colisao(tiro[i],obst3)){
-                exploObj.posX = obst3.posX;
-                exploObj.posY = obst3.posY - exploObj.altura - obst3.altura/2;
-                exploObj.ativo = true;
-                exploObj.temp = 0;
-                obst3.posX = (rand()% TELA_LARGURA) + TELA_LARGURA*1.5;
-                obst3.posY = (rand()% 400) + 100;
-                tiro[i].posY = 10000;
-                tiro[i].ativo = false;
-                score ++;
-                somaScore ++;
-
-            }else if (colisao(tiro[i],obst4)){
-                exploObj.posX = obst4.posX;
-                exploObj.posY = obst4.posY - exploObj.altura - obst4.altura/2;
-                exploObj.ativo = true;
-                exploObj.temp = 0;
-                obst4.posX = (rand()% TELA_LARGURA) + TELA_LARGURA*1.5;
-                obst4.posY = (rand()% 400) + 100;
-                tiro[i].posY = 10000;
-                tiro[i].ativo = false;
-                score ++;
-                somaScore ++;
-            }
-        }
-
-        exploObj.temp++;
-        exploObj2.temp++;
-        exploObj3.temp++;
-        exploObj4.temp++;
-        if(exploObj.temp>10)exploObj.ativo = false;
-        if(exploObj2.temp>10)exploObj2.ativo = false;
-        if(exploObj3.temp>10)exploObj3.ativo = false;
-        if(exploObj4.temp>10)exploObj4.ativo = false;
 
         //------------------------------------------------------------SISTEMA DE VIDAS
             if (vidas<3){
@@ -1356,6 +1181,13 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
             nave.posY =  TELA_ALTURA-nave.altura/2;
         }
 
+        if (nave.posX <= nave.largura/2){
+            nave.posX = nave.largura/2;
+        }
+        if (nave.posX >= TELA_LARGURA-nave.largura/2){
+            nave.posX =  TELA_LARGURA-nave.largura/2;
+        }
+
         //------------------------------------------------------------CONTROLES DO TECLADO
         if(cima){
             nave.posY-= velDesloc;
@@ -1367,10 +1199,11 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
             nave.ang= 2*ALLEGRO_PI;
         }
         if(freia){
-            nave.vel-=0.1;
-            if (nave.vel <=1)nave.vel=1;
+            nave.posX-= velDesloc;
         }
-        if(acelera)nave.vel+=0.1;
+        if(acelera){
+            nave.posX+= velDesloc;
+        }
 
     }
     drawTelaJogo();
@@ -1454,25 +1287,25 @@ void inicializaObjetos(){
     }
 
     explo.posX = 0;
-    obst.posX = 100;
+    obst.posX = backGround.posX + TELA_LARGURA;
     obst.xColisao = 30;
     obst.yColisao = 10;
     obst.x1Colisao = -30;
     obst.y1Colisao = -10;
 
-    obst2.posX = 100;
+    obst2.posX = backGround.posX + TELA_LARGURA;
     obst2.xColisao = 30;
     obst2.yColisao = 10;
     obst2.x1Colisao = -30;
     obst2.y1Colisao = -10;
 
-    obst3.posX = 100;
+    obst3.posX = backGround.posX + TELA_LARGURA;
     obst3.xColisao = 30;
     obst3.yColisao = 10;
     obst3.x1Colisao = -30;
     obst3.y1Colisao = -10;
 
-    obst4.posX = 100;
+    obst4.posX = backGround.posX + TELA_LARGURA;
     obst4.xColisao = 30;
     obst4.yColisao = 10;
     obst4.x1Colisao = -30;
@@ -1514,10 +1347,10 @@ void inicializaObjetos(){
         tiro[i].posY = -1000;
     }
 
-    obst.posY = 3300;
-    obst2.posY = 3300;
-    obst3.posY = 3300;
-    obst4.posY = 3300;
+    obst.posY = 1*(TELA_ALTURA/5);
+    obst2.posY = 2*(TELA_ALTURA/5);
+    obst3.posY = 3*(TELA_ALTURA/5);
+    obst4.posY = 4*(TELA_ALTURA/5);
     explo.posY = 3999;
     vilao.posY = 3000;
     btPlay.posY = 560;
