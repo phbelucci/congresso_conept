@@ -438,6 +438,8 @@ int main(void){
         if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP){
             posXMouseClick = evento.mouse.x/red_x;
             posYMouseClick = evento.mouse.y/red_y;
+            printf("\nX: %i",posXMouseClick);
+            printf("\nY: %i\n\n",posYMouseClick);
         }
 
         //****************************************************************************
@@ -462,7 +464,7 @@ int main(void){
     return 0;
 }//Fecha void main()
 void resetJogo(){
-    int i,j;
+    int i;
     if (cenarioClick == 1){
         backGround.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundEspaco.jpg");
         backGroundExplo.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundEspacoExplo.jpg");
@@ -536,7 +538,7 @@ void resetJogo(){
     obst.posX = backGround.posX + TELA_LARGURA;
     obst2.posX = backGround.posX + TELA_LARGURA;
     obst3.posX = backGround.posX + TELA_LARGURA;
-    obst4.posX = backGround.posX + TELA_LARGURA;
+    obst4.posX = TELA_LARGURA - obst4.largura;
     explo.posX = 4000;
     vilao.posX = 2500;
     vida1.posX = 1600;
@@ -548,10 +550,10 @@ void resetJogo(){
 
     //Declara e inicializa Variaveis com a posição Y dos objetos
     backGround.posY=0;
-    obst.posY = 1*(TELA_ALTURA/5);
-    obst2.posY = 2*(TELA_ALTURA/5);
-    obst3.posY = 3*(TELA_ALTURA/5);
-    obst4.posY = 4*(TELA_ALTURA/5) ;
+    obst.posY = 0;
+    obst2.posY = 358;
+    obst3.posY = 718;
+    obst4.posY = 0 ;
     explo.posY = 4000;
     vilao.posY = 100;
     vida1.posY = 10;
@@ -649,7 +651,7 @@ void loadBitmap(){
     obst.objetoBitmap =                  al_load_bitmap("img/img_novo/tunel_ajuste.png");
     obst2.objetoBitmap =                 al_load_bitmap("img/img_novo/tunel_ajuste.png");
     obst3.objetoBitmap =                 al_load_bitmap("img/img_novo/tunel_ajuste.png");
-    obst4.objetoBitmap =                 al_load_bitmap("img/img_novo/tunel_ajuste.png");
+    obst4.objetoBitmap =                 al_load_bitmap("img/img_novo/script.png");
     explo.objetoBitmap =                 al_load_bitmap("img/explo2.png");
     exploObj.objetoBitmap =              al_load_bitmap("img/exploNave.png");
     exploObj2.objetoBitmap =             al_load_bitmap("img/exploNave.png");
@@ -1098,8 +1100,6 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         //Posicionamento do obst3
         obst3.posX = backGround.posX + TELA_LARGURA;
 
-        //Posicionamento do obst4
-        obst4.posX = backGround.posX + TELA_LARGURA;
 
 
         //------------------------------------------------------------TRATAMENTO DAS COLISÕES
