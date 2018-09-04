@@ -7,9 +7,9 @@ Posicao:	Pontuacao:	Nome:
 
 4 º		60		DDFFD
 
-5 º		0		[VAZIO]
+5 º		60		TEST
 
-6 º		0		[VAZIO]
+6 º		20		TEST
 
 7 º		0		[VAZIO]
 
