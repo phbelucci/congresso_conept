@@ -1025,7 +1025,7 @@ void drawTelaJogo (){
     if(plusScore.ativo)al_draw_rotated_bitmap(plusScore.objetoBitmap, (al_get_bitmap_width(plusScore.objetoBitmap))/4, (al_get_bitmap_height(plusScore.objetoBitmap))/5, plusScore.posX, plusScore.posY,plusScore.ang,0);
     if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(rTime, gTime, bTime), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE: %i",somaScore*progressao);
     if(textTime.ativo)al_draw_textf(textTime.objetoFont, al_map_rgb(rTime, gTime, bTime), 20 , 10, ALLEGRO_ALIGN_LEFT, "TIME: %i",TEMPO_JOGO_SEGUNDOS - (tempJogo/FPS));
-    if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(rTime, gTime, bTime), ultimaChance.posX-150, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
+    if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(rTime, gTime, bTime), ultimaChance.posX-350, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
 }
 void telaJogo(){//----------------------------------------------------FUNCAO RESPONSALVEL PELO JOGO
     int i,r;

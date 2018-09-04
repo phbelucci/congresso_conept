@@ -1,11 +1,11 @@
 Posicao:	Pontuacao:	Nome:
 1 º		260		DFDF
 
-2 º		100		DFDDF
+2 º		140		DFD
 
-3 º		0		[VAZIO]
+3 º		100		DFDDF
 
-4 º		0		[VAZIO]
+4 º		60		DDFFD
 
 5 º		0		[VAZIO]
 
