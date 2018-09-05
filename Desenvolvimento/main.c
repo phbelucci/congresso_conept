@@ -27,6 +27,8 @@
 #define     NUM_JOGADORES           10
 #define     TAMANHO_NOME_PLAYER     10
 #define     NUM_TIROS               15
+#define     FAIXA1_POS_Y            362
+#define     FAIXA2_POS_Y            718
 
 //----------------------------------------------------DECLARAÇÃO DE VARIÁVEIS GLOBAIS
 // Ponteiro representando a janela principal
@@ -101,6 +103,8 @@ Objeto ultimaChance;
 
 
 //Declara e inicializa Variaveis de controle do jogo
+int passTunel= 0;
+char scriptTXT[16][40];
 char ultChTexto[10];
 bool sair = 0;
 bool pause = 0;
@@ -110,7 +114,7 @@ int somaScore = 0;
 int tempJogo=0;
 int telaAtual=TELA_MENU;
 int vidas = 3;
-char nomePlayer[TAMANHO_NOME_PLAYER]={"SEU NICK"};
+char nomePlayer[TAMANHO_NOME_PLAYER]={"No DE R.A."};
 int indexNome = -1;
 int caracterPendente = 0;  // 0 - Não há letra a ser lida   e 1 - Letra  aguardando ser lida
 char caracter='\0';    // Armazena o caractere digitado
@@ -464,7 +468,8 @@ int main(void){
     return 0;
 }//Fecha void main()
 void resetJogo(){
-    int i;
+    FILE *arq = NULL;
+    int i,j;
     if (cenarioClick == 1){
         backGround.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundEspaco.jpg");
         backGroundExplo.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundEspacoExplo.jpg");
@@ -472,6 +477,7 @@ void resetJogo(){
         backGround.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundCidade.jpg");
         backGroundExplo.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundCidadeExplo.jpg");
     }
+    passTunel= 0;
     score = 0;
     somaScore = 0;
     tempJogo=0;
@@ -577,6 +583,25 @@ void resetJogo(){
     tempExploNave = 999;
     posColisao = 0;
     piscaNave=0;
+
+    //Carrega scriptTXT
+    arq = fopen("exercicios/algoritmo1.txt","r");
+    if(arq==NULL){
+        al_show_native_message_box(janela,"NAO HA EXERCICOS CADASTRADOS !!!","INSIRA UM ARQUIVO ALGORITMO1.TXT\nNA PASTA EXERCICIOS!","",NULL,ALLEGRO_MESSAGEBOX_WARN);
+        telaAtual = TELA_ESCOLHA;
+    }else{
+        for(i=0;i<16;i++){
+            fgets(scriptTXT[i],40,arq);
+        }
+        for(i=0;i<16;i++){
+            for(j=0;j<40;j++){
+                if(scriptTXT[i][j]=='\n'){
+                    scriptTXT[i][j] = '\0';
+                }
+            }
+        }
+    }
+    fclose(arq);
 }
 bool colisao(Objeto obj1, Objeto obj2){
     bool ok = false;
@@ -711,7 +736,7 @@ void telaEscolha(){//----------------------------------------------------FUNCAO 
      al_draw_textf(textPlayer.objetoFont, al_map_rgb(255, 255, 0), 980, 631, ALLEGRO_ALIGN_CENTER, "%s",nomePlayer);
 
      if(indexNome==0){
-        strcpy(nomePlayer,"SEU NICK");
+        strcpy(nomePlayer,"No DE R.A.");
      }
      if(caracterPendente){
         if(indexNome<0){
@@ -781,11 +806,11 @@ void telaEscolha(){//----------------------------------------------------FUNCAO 
 
      }else if(mouseClick(btPlayJogo.objetoBitmap, btPlayJogo.posX, btPlayJogo.posY)){
         if ((cenarioClick == 1)||(cenarioClick == 2)){
-            if(strcmp(nomePlayer,"SEU NICK")){
-                resetJogo();
+            if(strcmp(nomePlayer,"No DE R.A.")){
                 telaAtual = TELA_JOGO;
-            }else al_show_native_message_box(janela,"HEY INDIGENTE","QUEM E VOCE AFINAL?\nDIGITE SEU NICK DE PERDEDOR!!!","",NULL,ALLEGRO_MESSAGEBOX_WARN);
-        }else al_show_native_message_box(janela,"ACORDE ! ! !","DEIXE DE PREGUICA,\nESCOLHA UM CENARIO!","",NULL,ALLEGRO_MESSAGEBOX_WARN);
+                resetJogo();
+            }else al_show_native_message_box(janela,"! ! ! ATENCAO ! ! !","NAO SE ESQUECA DE \nDIGITAR SEU REGISTRO ACADEMICO!!!","",NULL,ALLEGRO_MESSAGEBOX_WARN);
+        }else al_show_native_message_box(janela,"! ! ! ATENCAO ! ! !","PARA PROSSEGUIR, \nESCOLHA UM CENARIO!","",NULL,ALLEGRO_MESSAGEBOX_WARN);
      }
 
      if (naveClick == 1){
@@ -974,7 +999,7 @@ void telaRanking(){//-------------------------------------------------FUNCAO RES
         naveClick = 0;
         cenarioClick = 0;
         jogoSalvo = 0;
-        strcpy(nomePlayer,"SEU NICK");
+        strcpy(nomePlayer,"No DE R.A.");
         indexNome = -1;
         caracterPendente=0;
         caracter='\0';
@@ -998,7 +1023,7 @@ void telaRanking(){//-------------------------------------------------FUNCAO RES
 
 }
 void drawTelaJogo (){
-
+    int i,posYTextRanking = 60;
     //------------------------------------------------------------Desenha/Atualiza objetos na tela
     if(tempExploNave>=TEMPO_EXPLOSAO)al_draw_bitmap(backGround.objetoBitmap, backGround.posX, backGround.posY, 0);
     else al_draw_bitmap(backGroundExplo.objetoBitmap, backGround.posX, backGround.posY, 0);
@@ -1026,6 +1051,11 @@ void drawTelaJogo (){
     if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(rTime, gTime, bTime), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE: %i",somaScore*progressao);
     if(textTime.ativo)al_draw_textf(textTime.objetoFont, al_map_rgb(rTime, gTime, bTime), 20 , 10, ALLEGRO_ALIGN_LEFT, "TIME: %i",TEMPO_JOGO_SEGUNDOS - (tempJogo/FPS));
     if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(rTime, gTime, bTime), ultimaChance.posX-350, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
+
+    for(i=0;i<16;i++){
+    al_draw_text(textRank.objetoFont, al_map_rgb(255, 255, 0), (float)(TELA_LARGURA-obst4.largura+60), posYTextRanking, ALLEGRO_ALIGN_LEFT, scriptTXT[i]);
+    posYTextRanking += 60;
+    }
 }
 void telaJogo(){//----------------------------------------------------FUNCAO RESPONSALVEL PELO JOGO
     int i,r;
@@ -1069,28 +1099,7 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
             backGround.posX=0;
             r = 0;
         }
-         //Posicionamento Vilao
-        vilao.posX -= vilao.vel+nave.vel;
-        if (vilao.posX<=-(al_get_bitmap_width(vilao.objetoBitmap)+10)){
-            vilao.posY = (rand()% (TELA_ALTURA-al_get_bitmap_height(vilao.objetoBitmap))) + 0;
-            vilao.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-        }
-        //Posicionamento PlusTime
-        plusTime.ang += (0.0349066)*2;
-        plusTime.posX -= (plusTime.vel+nave.vel);
-        if (plusTime.posX <= -50){
-            plusTime.posY = (rand()% TELA_ALTURA-100) + 100;
-            plusTime.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            plusTime.vel = (rand()% 2) + 1;
-        }
-        //Posicionamento PlusScore
-        plusScore.ang += (0.0349066)*2;
-        plusScore.posX -= (plusScore.vel+nave.vel);
-        if (plusScore.posX <= -50){
-            plusScore.posY = (rand()% TELA_ALTURA-100) + 100;
-            plusScore.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            plusScore.vel = (rand()% 2) + 1;
-        }
+
         //Posicionamento do obst
         obst.posX = backGround.posX + TELA_LARGURA;
 
@@ -1105,67 +1114,23 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         //------------------------------------------------------------TRATAMENTO DAS COLISÕES
         if (colisao(nave,obst)){
             strcpy(ultChTexto,"TUNEL 1");
+            passTunel = 1;
             ultimaChance.ativo = true;
+
 
         }else if (colisao(nave,obst2)){
             strcpy(ultChTexto,"TUNEL 2");
+            passTunel = 2;
             ultimaChance.ativo = true;
 
         }else if (colisao(nave,obst3)){
             strcpy(ultChTexto,"TUNEL 3");
+            passTunel = 3;
             ultimaChance.ativo = true;
-
-        }else if (colisao(nave,obst4)){
-            strcpy(ultChTexto,"TUNEL 4");
-            ultimaChance.ativo = true;
+        }else{
+            passTunel = 0;
         }
 
-        if (colisao(nave,plusTime)){
-            tempJogo = tempJogo - 120;
-            plusTime.posY = (rand()% 1000) + 100;
-            plusTime.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-        }
-        if (colisao(nave,plusScore)){
-            somaScore += 2;
-            plusScore.posY = (rand()% 1000) + 100;
-            plusScore.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-        }
-
-        //------------------------------------------------------------SISTEMA DE VIDAS
-            if (vidas<3){
-                vida1.ativo=0;
-            }
-            if (vidas<2){
-                vida2.ativo=0;
-            }
-            if (vidas==0){
-               vida3.ativo=0;
-               ultimaChance.temp++;
-               if(ultimaChance.temp>10){
-                    ultimaChance.temp=0;
-                    if(ultimaChance.ativo==1)ultimaChance.ativo=0;
-                    else ultimaChance.ativo=1;
-               }
-            }
-            if (vidas<0){
-                telaAtual = TELA_RANKING;
-            }
-
-        //------------------------------------------------------------TRATAMENTO DAS EXPLOSÕES
-        if(tempExploNave<TEMPO_EXPLOSAO){
-            explo.posX -= nave.vel;
-            tempExploNave++;
-        }else if(tempExploNave==TEMPO_EXPLOSAO){
-            explo.posX = 5000;
-            tempExploNave++;
-            posColisao=0;
-            obst.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst.posY = (rand()% 300) + 50;
-            obst2.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst2.posY = (rand() % 600) + 320;
-            obst3.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-            obst3.posY = (rand()% 1000) + 680;
-        }
         //------------------------------------------------------------CONTROLA TEMPO DE JOGO
         tempJogo++;
         if(tempJogo>TEMPO_JOGO_SEGUNDOS*FPS){
@@ -1174,6 +1139,7 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         }
 
         //------------------------------------------------------------LIMITE SUP E INF
+        //----------LIMITES DA TELA
         if (nave.posY <= nave.altura/2){
             nave.posY = nave.altura/2;
         }
@@ -1188,13 +1154,34 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
             nave.posX =  TELA_LARGURA-nave.largura/2;
         }
 
+        //----------LIMITES DO TUNEL
+        switch(passTunel){
+        case 1:
+            if (nave.posY >= FAIXA1_POS_Y-nave.altura/2){
+            nave.posY =  FAIXA1_POS_Y-nave.altura/2;
+        }
+            break;
+        case 2:
+            if (nave.posY <= FAIXA1_POS_Y + nave.altura/2){
+                nave.posY = FAIXA1_POS_Y + nave.altura/2;
+            }else if(nave.posY >= FAIXA2_POS_Y-nave.altura/2){
+                nave.posY =  FAIXA2_POS_Y-nave.altura/2;
+            }
+            break;
+        case 3:
+            if (nave.posY <= FAIXA2_POS_Y + nave.altura/2){
+                nave.posY = FAIXA2_POS_Y + nave.altura/2;
+            }
+            break;
+        }
+
         //------------------------------------------------------------CONTROLES DO TECLADO
         if(cima){
             nave.posY-= velDesloc;
-            nave.ang=(6.10865);
+            nave.ang=(6.05865);
         }else if(baixo){
             nave.posY+= velDesloc;
-            nave.ang=(0.174533);
+            nave.ang=(0.124533);
         }else{
             nave.ang= 2*ALLEGRO_PI;
         }
