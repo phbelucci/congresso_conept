@@ -1,16 +1,4 @@
 int main()
 {
-   Paulao, blza man??
-   Por favor encontre
-   uma fonte que se 
-   adeque ao formato
-   desse script. Pois 
-   esta daqui esta 
-   deixando o codigo 
-   meio baguncado,
-   entende ? ? ?
-   hahaha
-   Prazer,
-   Eu sou o Jarvis...
-   return 0;
+   Feito Jarvis...
 }

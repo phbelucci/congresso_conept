@@ -34,7 +34,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="../../../../../../../../../../../Program Files (x86)/CodeBlocks/MinGW/allegro-5.0.10-mingw-4.7.0/include" />
+			<Add directory="../allegro-5.0.10-mingw-4.7.0/include" />
 		</Compiler>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />

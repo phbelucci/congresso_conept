@@ -701,7 +701,7 @@ void loadBitmap(){
 
     // CARREGA FONTES TTF
     textTime.objetoFont =              al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
-    textRank.objetoFont =              al_load_font("fonte/alarm_clock/alarm_clock.ttf", 40, ALLEGRO_TTF_NO_KERNING);
+    textRank.objetoFont =              al_load_font("fonte/cambriab.ttf", 30, ALLEGRO_TTF_NO_KERNING);
     textPlayer.objetoFont =            al_load_font("fonte/alarm_clock/alarm_clock.ttf", 90, ALLEGRO_TTF_NO_KERNING);
     textScoreJogo.objetoFont =         al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
     ultimaChance.objetoFont =          al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
