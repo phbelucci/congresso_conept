@@ -1,4 +1,11 @@
 int main()
 {
-   Feito Jarvis...
+   O congresso Conept
+   sera sediado na
+   cidade de %%Araraquara;;Campinas;;Pindamoiangaba%%
+   no dia 19 de setembro
+   de 2018.
+
+   Nao percam ! ! !
+     
 }

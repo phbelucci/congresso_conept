@@ -29,6 +29,7 @@
 #define     NUM_TIROS               15
 #define     FAIXA1_POS_Y            362
 #define     FAIXA2_POS_Y            718
+#define     LIM_COMPRIMENTO_TXT     200
 
 //----------------------------------------------------DECLARAÇÃO DE VARIÁVEIS GLOBAIS
 // Ponteiro representando a janela principal
@@ -104,7 +105,8 @@ Objeto ultimaChance;
 
 //Declara e inicializa Variaveis de controle do jogo
 int passTunel= 0;
-char scriptTXT[16][40];
+char txtTunel_1[LIM_COMPRIMENTO_TXT],txtTunel_2[LIM_COMPRIMENTO_TXT],txtTunel_3[LIM_COMPRIMENTO_TXT];
+char scriptTXT[16][LIM_COMPRIMENTO_TXT];
 char ultChTexto[10];
 bool sair = 0;
 bool pause = 0;
@@ -152,6 +154,12 @@ bool freia = 0;
 bool acelera = 0;
 int disparo =0;
 
+/*----------------------------------------------------
+RECEBE UMA STRING LINHA E IDENTIFICA SEU ESPAÇO EM
+BRANCO E AS 3 ALTERNATIVAS POSSÍVEIS, DEVOLVE LINHA
+FORMATADA: "_ _ _ _"
+----------------------------------------------------*/
+bool identificaOpcao(char *txt,char *op1,char *op2,char *op3);
 /*----------------------------------------------------
 ATRIBUI OS VALORES INICIAIS AS VARIÁVEIS RELACIONADAS
 A TELA JOGO ANTES DE INICIAR UMA NOVA PARTIDA
@@ -467,6 +475,86 @@ int main(void){
 
     return 0;
 }//Fecha void main()
+
+bool identificaOpcao(char *txt,char *op1,char *op2,char *op3){
+    bool ok = true;
+    int i,j,ini = 999,pv1=0,pv2=0,fim=999,aux = 0;
+    char txtPreOp[LIM_COMPRIMENTO_TXT],txtPosOp[LIM_COMPRIMENTO_TXT];
+	//Identifica as demarcacoes
+	for(i=0;i<strlen(txt);i++){
+		if((txt[i]=='%')&&(txt[i+1]=='%')){
+            if(ini==999){
+                i += 2;
+                ini = i;
+            }else{
+                fim = i;
+                break;
+            }
+		}
+		if((txt[i]==';')&&(txt[i+1]==';')&&(pv1 == 0)){
+            pv1 = i;
+            i += 2;
+		}
+		if((txt[i]==';')&&(txt[i+1]==';')&&(pv2 == 0)){
+            pv2 = i;
+            i += 1;
+		}
+		//Linha para debug
+		//printf("\n\n**************\n%i\n%i\n%i\n%i\n*********************\n\n",ini,pv1,pv2,fim);
+	}
+	if((ini == 999) || (fim == 999))return false;
+	//preenche as opcoes de acordo com as demarcacoes
+	if(pv1>=ini){
+        j=0;
+        for(i=ini;i<pv1;i++){
+            op1[j] = txt[i];
+            j++;
+        }
+        op1[j] = '\0';
+	}
+
+	if(pv2>=pv1+2){
+        j=0;
+        for(i=pv1+2;i<pv2;i++){
+            op2[j] = txt[i];
+            j++;
+        }
+        op2[j] = '\0';
+	}
+
+	if(fim>=pv2+2){
+        j=0;
+        for(i=pv2+2;i<fim;i++){
+            op3[j] = txt[i];
+            j++;
+        }
+        op3[j] = '\0';
+	}
+
+    j=0;
+	for(i=0;i<ini-2;i++){
+        txtPreOp[j] = txt[i];
+        j++;
+	}
+	txtPreOp[j] = '\0';
+
+	j=0;
+	for(i=fim+2;i<strlen(txt);i++){
+        txtPosOp[j] = txt[i];
+        j++;
+	}
+	txtPosOp[j] = '\0';
+
+    strcat(txtPreOp, "_ _ _ _");
+    strcat(txtPreOp, txtPosOp);
+    strcpy(txt, txtPreOp);
+
+	//Linha para debug
+    //printf("\n\n**************\n%i\n%i\n%i\n%i\n*********************\n\n",ini,pv1,pv2,fim);
+	return ok;
+}
+
+
 void resetJogo(){
     FILE *arq = NULL;
     int i,j;
@@ -478,6 +566,9 @@ void resetJogo(){
         backGroundExplo.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundCidadeExplo.jpg");
     }
     passTunel= 0;
+    strcpy(txtTunel_1," ");
+    strcpy(txtTunel_2," ");
+    strcpy(txtTunel_3," ");
     score = 0;
     somaScore = 0;
     tempJogo=0;
@@ -591,17 +682,31 @@ void resetJogo(){
         telaAtual = TELA_ESCOLHA;
     }else{
         for(i=0;i<16;i++){
-            fgets(scriptTXT[i],40,arq);
-        }
-        for(i=0;i<16;i++){
-            for(j=0;j<40;j++){
-                if(scriptTXT[i][j]=='\n'){
-                    scriptTXT[i][j] = '\0';
-                }
-            }
+            fgets(scriptTXT[i],LIM_COMPRIMENTO_TXT,arq);
         }
     }
     fclose(arq);
+    for(i=0;i<16;i++){
+        //Retira a quebra de linha da string e substitui por caracter nulo
+        j=0;
+        while(j<LIM_COMPRIMENTO_TXT){
+            if(scriptTXT[i][j]=='\n'){
+                scriptTXT[i][j] = '\0';
+                break;
+            }
+            j++;
+        }
+
+    }
+    for(i=0;i<16;i++){
+        if(identificaOpcao(scriptTXT[i],txtTunel_1,txtTunel_2,txtTunel_3)){
+            printf("\n\n%s\n%s\n%s\n\n",txtTunel_1,txtTunel_2,txtTunel_3);
+            printf("\nContem teste");
+        }else{
+            printf("\nNao contem teste");
+        }
+    }
+
 }
 bool colisao(Objeto obj1, Objeto obj2){
     bool ok = false;
@@ -705,7 +810,9 @@ void loadBitmap(){
     textPlayer.objetoFont =            al_load_font("fonte/alarm_clock/alarm_clock.ttf", 90, ALLEGRO_TTF_NO_KERNING);
     textScoreJogo.objetoFont =         al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
     ultimaChance.objetoFont =          al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
-
+    obst.objetoFont =                  al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
+    obst2.objetoFont =                 al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
+    obst3.objetoFont =                 al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
 
 }
 void telaMenu(){//----------------------------------------------------FUNCAO RESPONSALVEL PELO MENU
@@ -1034,18 +1141,24 @@ void drawTelaJogo (){
     }
     if(nave.ativo)al_draw_rotated_bitmap(nave.objetoBitmap, nave.largura/2, nave.altura/2, nave.posX, nave.posY,nave.ang,0);
 
-    if(obst.ativo)al_draw_bitmap(obst.objetoBitmap, obst.posX, obst.posY, 0);
-    if(obst2.ativo)al_draw_bitmap(obst2.objetoBitmap, obst2.posX, obst2.posY, 0);
-    if(obst3.ativo)al_draw_bitmap(obst3.objetoBitmap, obst3.posX, obst3.posY, 0);
+    if(obst.ativo){
+        al_draw_bitmap(obst.objetoBitmap, obst.posX, obst.posY, 0);
+        al_draw_text(obst.objetoFont, al_map_rgb(255, 255, 0), obst.posX+100, obst.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_1);
+    }
+    if(obst2.ativo){
+        al_draw_bitmap(obst2.objetoBitmap, obst2.posX, obst2.posY, 0);
+        al_draw_text(obst2.objetoFont, al_map_rgb(255, 255, 0), obst2.posX+100, obst2.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_2);
+    }
+    if(obst3.ativo){
+        al_draw_bitmap(obst3.objetoBitmap, obst3.posX, obst3.posY, 0);
+        al_draw_text(obst3.objetoFont, al_map_rgb(255, 255, 0), obst3.posX+100, obst3.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_3);
+    }
     if(obst4.ativo)al_draw_bitmap(obst4.objetoBitmap, obst4.posX, obst4.posY, 0);
     if(explo.ativo)al_draw_bitmap(explo.objetoBitmap, explo.posX, explo.posY, 0);
     if(exploObj.ativo)al_draw_bitmap(exploObj.objetoBitmap, exploObj.posX, exploObj.posY, 0);
     if(exploObj2.ativo)al_draw_bitmap(exploObj2.objetoBitmap, exploObj2.posX, exploObj2.posY, 0);
     if(exploObj3.ativo)al_draw_bitmap(exploObj3.objetoBitmap, exploObj3.posX, exploObj3.posY, 0);
     if(exploObj4.ativo)al_draw_bitmap(exploObj4.objetoBitmap, exploObj4.posX, exploObj4.posY, 0);
-    if(vida1.ativo)al_draw_bitmap(vida1.objetoBitmap,vida1.posX,vida1.posY,0);
-    if(vida2.ativo)al_draw_bitmap(vida2.objetoBitmap,vida2.posX,vida2.posY,0);
-    if(vida3.ativo)al_draw_bitmap(vida3.objetoBitmap,vida3.posX,vida3.posY,0);
     if(plusTime.ativo)al_draw_rotated_bitmap(plusTime.objetoBitmap, (al_get_bitmap_width(plusTime.objetoBitmap))/4, (al_get_bitmap_height(plusTime.objetoBitmap))/4, plusTime.posX, plusTime.posY,plusTime.ang,0);
     if(plusScore.ativo)al_draw_rotated_bitmap(plusScore.objetoBitmap, (al_get_bitmap_width(plusScore.objetoBitmap))/4, (al_get_bitmap_height(plusScore.objetoBitmap))/5, plusScore.posX, plusScore.posY,plusScore.ang,0);
     if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(rTime, gTime, bTime), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE: %i",somaScore*progressao);
