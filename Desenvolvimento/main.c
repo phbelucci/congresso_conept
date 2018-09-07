@@ -26,19 +26,18 @@
 #define     TELA_FIM_TEMPO          5
 #define     NUM_JOGADORES           10
 #define     TAMANHO_NOME_PLAYER     10
-#define     NUM_TIROS               15
 #define     FAIXA1_POS_Y            362
 #define     FAIXA2_POS_Y            718
-#define     LIM_COMPRIMENTO_TXT     200
+#define     TAMANHO_LINHA_ALGORTIMO 200
 
 //----------------------------------------------------DECLARAÇÃO DE VARIÁVEIS GLOBAIS
 // Ponteiro representando a janela principal
 ALLEGRO_DISPLAY *janela = NULL;
 //Poteiro que recebe  o TIMER do programa
 ALLEGRO_TIMER *timer = NULL;
-//Matriz para receber as naves e seus respectivos estados de destruição
-ALLEGRO_BITMAP *naveImagem[3][3];
-//Estrutura que representa os objetos do jogo(Nave, obstáculos, botões e etc.)
+//Matriz para receber as carros e seus respectivos estados de destruição
+ALLEGRO_BITMAP *carroImagem[3][3];
+//Estrutura que representa os objetos do jogo(Nave, tunel1áculos, botões e etc.)
 typedef struct{
     int posX;
     int posY;
@@ -52,50 +51,37 @@ typedef struct{
     float vel;
     float ang;
     bool ativo;
+    int textColour_R;
+    int textColour_G;
+    int textColour_B;
     ALLEGRO_BITMAP *objetoBitmap;
     ALLEGRO_FONT *objetoFont;
 }Objeto;
 // Declaração dos objetos do jogo
 Objeto backGround;
-Objeto backGroundExplo;
 Objeto backGroundCidade;
-Objeto cenario1;
-Objeto cenario2;
-Objeto cenario3;
 Objeto backGroundMenu;
 Objeto backGroundEscolha;
 Objeto backGroundRanking;
 Objeto backGroundPause;
 Objeto backGroundFimTempo;
-Objeto nave;
-Objeto tiro[NUM_TIROS];
-Objeto obst;
-Objeto obst2;
-Objeto obst3;
-Objeto obst4;
-Objeto explo;
-Objeto exploObj;
-Objeto exploObj2;
-Objeto exploObj3;
-Objeto exploObj4;
-Objeto vilao;
+Objeto carro;
+Objeto tunel1;
+Objeto tunel2;
+Objeto tunel3;
+Objeto Quadro;
 Objeto btPlay;
 Objeto btExit;
 Objeto btPlayAgain;
 Objeto btQuit;
-Objeto btNaveZero;
-Objeto btNaveUm;
-Objeto btNaveDois;
+Objeto btCarro1;
+Objeto btCarro2;
+Objeto btCarro3;
 Objeto btCenarioEspaco;
 Objeto btCenarioCidade;
 Objeto btPlayJogo;
 Objeto btPlayPause;
 Objeto btExitPause;
-Objeto vida1;
-Objeto vida2;
-Objeto vida3;
-Objeto plusTime;
-Objeto plusScore;
 Objeto textTime;
 Objeto textRank;
 Objeto textScoreJogo;
@@ -104,9 +90,9 @@ Objeto ultimaChance;
 
 
 //Declara e inicializa Variaveis de controle do jogo
-int passTunel= 0;
-char txtTunel_1[LIM_COMPRIMENTO_TXT],txtTunel_2[LIM_COMPRIMENTO_TXT],txtTunel_3[LIM_COMPRIMENTO_TXT];
-char scriptTXT[16][LIM_COMPRIMENTO_TXT];
+int passTunel= 0; //Armazena numero do tunel que o carro passou
+char txtTunel_1[TAMANHO_LINHA_ALGORTIMO],txtTunel_2[TAMANHO_LINHA_ALGORTIMO],txtTunel_3[TAMANHO_LINHA_ALGORTIMO];
+char scriptTXT[16][TAMANHO_LINHA_ALGORTIMO];
 char ultChTexto[10];
 bool sair = 0;
 bool pause = 0;
@@ -115,44 +101,36 @@ int score = 0;
 int somaScore = 0;
 int tempJogo=0;
 int telaAtual=TELA_MENU;
-int vidas = 3;
 char nomePlayer[TAMANHO_NOME_PLAYER]={"No DE R.A."};
+int posColisao = 4000;
+int piscaCarro=0;
+int tempTelaFimTempo = 0;
+int progressao = 10;
+int tipoCarro = 0;
+int estadoCarro = 0;
+int carroClick = 0;
+int cenarioClick = 0;
+int rankingScore[NUM_JOGADORES],i;
+char rankingPlayers[NUM_JOGADORES][50];
+float velDesloc = 8;
+
+//Variaveis para controle do teclado
+bool cima = 0;
+bool baixo = 0;
+bool esquerda = 0;
+bool direita = 0;
 int indexNome = -1;
 int caracterPendente = 0;  // 0 - Não há letra a ser lida   e 1 - Letra  aguardando ser lida
 char caracter='\0';    // Armazena o caractere digitado
 bool teclaEnter = 0;
 bool teclaApagar = 0;
-int rTime = 0;
-int gTime = 255;
-int bTime = 255;
-int progressao = 10;
-int tipoNave = 0;
-int estadoNave = 0;
-int naveClick = 0;
-int cenarioClick = 0;
-int rankingScore[NUM_JOGADORES],i;
-char rankingPlayers[NUM_JOGADORES][50];
-int limitTiro = 0;
-//Declara e inicializa Variaveis com a posição X dos objetos
+
+
+//Variaveis para controle do mouse
 int posXMouse = 4000;
 int posXMouseClick = 4000;
-//Declara e inicializa Variaveis com a posição Y dos objetos
 int posYMouse = 4000;
 int posYMouseClick = 4000;
-//Declara e inicializa Variavel de incremento/decremento para deslocamento vertical dos objetos
-float velDesloc = 8;
-//Declara e inicializa Variavel para contagem de tempo
-int tempExploNave = 4000;
-int posColisao = 4000;
-int piscaNave=0;
-int tempTiro = 0;
-int tempTelaFimTempo = 0;
-//Declara e inicializa Variaveis de controle do teclado
-bool cima = 0;
-bool baixo = 0;
-bool freia = 0;
-bool acelera = 0;
-int disparo =0;
 
 /*----------------------------------------------------
 RECEBE UMA STRING LINHA E IDENTIFICA SEU ESPAÇO EM
@@ -362,11 +340,11 @@ int main(void){
                 break;
                 //seta para esquerda
                 case ALLEGRO_KEY_LEFT:
-                freia = 1;
+                esquerda = 1;
                 break;
                 //seta para direita.
                 case ALLEGRO_KEY_RIGHT:
-                acelera = 1;
+                direita = 1;
                 break;
                 //esc. sair=1 faz com que o programa saia do loop principal
                 case ALLEGRO_KEY_ESCAPE:
@@ -412,12 +390,12 @@ int main(void){
                 break;
                 //seta para esquerda
                 case ALLEGRO_KEY_LEFT:
-                freia = 0;
+                esquerda = 0;
                 break;
 
                 //seta para direita.
                 case ALLEGRO_KEY_RIGHT:
-                acelera = 0;
+                direita = 0;
                 break;
                 case ALLEGRO_KEY_BACKSPACE:
                 teclaApagar = 0;
@@ -462,7 +440,7 @@ int main(void){
         }
 
         if(sair){
-           int resp = al_show_native_message_box(janela,"Fechar","Deseja mesmo sair ???\nSentirei saudades...  :=( ","",NULL,ALLEGRO_MESSAGEBOX_YES_NO);
+           int resp = al_show_native_message_box(janela,"Fechar","Deseja mesmo interromper a\naprendizagem ativa agora??  :=( ","",NULL,ALLEGRO_MESSAGEBOX_YES_NO);
             if (resp)sair=1;
             else sair=0;
         }
@@ -479,7 +457,7 @@ int main(void){
 bool identificaOpcao(char *txt,char *op1,char *op2,char *op3){
     bool ok = true;
     int i,j,ini = 999,pv1=0,pv2=0,fim=999,aux = 0;
-    char txtPreOp[LIM_COMPRIMENTO_TXT],txtPosOp[LIM_COMPRIMENTO_TXT];
+    char txtPreOp[TAMANHO_LINHA_ALGORTIMO],txtPosOp[TAMANHO_LINHA_ALGORTIMO];
 	//Identifica as demarcacoes
 	for(i=0;i<strlen(txt);i++){
 		if((txt[i]=='%')&&(txt[i+1]=='%')){
@@ -556,124 +534,59 @@ bool identificaOpcao(char *txt,char *op1,char *op2,char *op3){
 
 
 void resetJogo(){
-    FILE *arq = NULL;
-    int i,j;
+    FILE *arq = NULL; //arquivo para carregar Algoritmos
+    int i,j;//Variaveis para controle de iteracoes
     if (cenarioClick == 1){
         backGround.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundEspaco.jpg");
-        backGroundExplo.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundEspacoExplo.jpg");
     }else if (cenarioClick ==2){
         backGround.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundCidade.jpg");
-        backGroundExplo.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundCidadeExplo.jpg");
     }
+
     passTunel= 0;
-    strcpy(txtTunel_1," ");
-    strcpy(txtTunel_2," ");
-    strcpy(txtTunel_3," ");
     score = 0;
     somaScore = 0;
     tempJogo=0;
-    vidas = 3;
     posColisao = 0;
-    estadoNave = 0;
-    nave.objetoBitmap=naveImagem[tipoNave][estadoNave];
-    disparo = 0;
-    posColisao = 0;
-    limitTiro = 0;
-
-    exploObj.temp=999;
-    exploObj2.temp=999;
-    exploObj3.temp=999;
-    exploObj4.temp=999;
-
-    exploObj.ativo=0;
-    exploObj2.ativo=0;
-    exploObj3.ativo=0;
-    exploObj4.ativo=0;
-
-    vida1.ativo = 1;
-    vida2.ativo = 1;
-    vida3.ativo = 1;
-
     ultimaChance.ativo = 0;
     ultimaChance.temp = 0;
 
-    for(i=0;i<NUM_TIROS;i++){
-        tiro[i].ativo=false;
-    }
-
-    //Declara Dimensoes dos Objetos
-    nave.altura = al_get_bitmap_height(nave.objetoBitmap);
-    nave.largura = al_get_bitmap_width(nave.objetoBitmap)-50;
-    obst.largura = al_get_bitmap_width(obst.objetoBitmap);
-    obst.altura = al_get_bitmap_height(obst.objetoBitmap);
-    obst2.largura = al_get_bitmap_width(obst2.objetoBitmap);
-    obst2.altura = al_get_bitmap_height(obst2.objetoBitmap);
-    obst3.largura = al_get_bitmap_width(obst3.objetoBitmap);
-    obst3.altura = al_get_bitmap_height(obst3.objetoBitmap);
-    obst4.largura = al_get_bitmap_width(obst4.objetoBitmap);
-    obst4.altura = al_get_bitmap_height(obst4.objetoBitmap);
-
-    for(i=0;i<NUM_TIROS;i++){
-        tiro[i].largura = al_get_bitmap_width(tiro[i].objetoBitmap);
-        tiro[i].altura = al_get_bitmap_height(tiro[i].objetoBitmap);
-    }
-
-    plusTime.largura = al_get_bitmap_width(plusTime.objetoBitmap);
-    plusTime.altura = al_get_bitmap_height(plusTime.objetoBitmap);
-    plusScore.largura = al_get_bitmap_width(plusScore.objetoBitmap);
-    plusScore.altura = al_get_bitmap_height(plusScore.objetoBitmap);
-
-    explo.largura = al_get_bitmap_width(explo.objetoBitmap);
-    explo.altura = al_get_bitmap_height(explo.objetoBitmap);
-
-    vilao.largura = al_get_bitmap_width(vilao.objetoBitmap);
-    vilao.altura = al_get_bitmap_height(vilao.objetoBitmap);
-
-    //Declara e inicializa Variaveis com a posição X dos objetos
     backGround.posX=0;
-    nave.posX = 100;
-    obst.posX = backGround.posX + TELA_LARGURA;
-    obst2.posX = backGround.posX + TELA_LARGURA;
-    obst3.posX = backGround.posX + TELA_LARGURA;
-    obst4.posX = TELA_LARGURA - obst4.largura;
-    explo.posX = 4000;
-    vilao.posX = 2500;
-    vida1.posX = 1600;
-    vida2.posX = 1700;
-    vida3.posX = 1800;
-
-    plusTime.posX = TELA_LARGURA+1500;
-    plusScore.posX = TELA_LARGURA+1500;
-
-    //Declara e inicializa Variaveis com a posição Y dos objetos
     backGround.posY=0;
-    obst.posY = 0;
-    obst2.posY = 358;
-    obst3.posY = 718;
-    obst4.posY = 0 ;
-    explo.posY = 4000;
-    vilao.posY = 100;
-    vida1.posY = 10;
-    vida2.posY = 10;
-    vida3.posY = 10;
 
-    //Declara e inicializa Variaveis com a velocidade dos objetos
-    nave.vel= 10;
-    for(i=0;i<NUM_TIROS;i++){
-        tiro[i].vel = 15;
-    }
-
-    obst.vel  = rand()%9 + 5;
-    obst2.vel = rand()%9 + 5;
-    obst3.vel = rand()%9 + 5;
-    obst4.vel = rand()%9 + 5;
+    carro.posX = 150;
+    carro.posY=500;
+    carro.vel= 10;
     velDesloc = rand()%5 + 6;
-    vilao.vel = 4;
+    carro.ang= 2*ALLEGRO_PI;
+    estadoCarro = 0;
+    carro.objetoBitmap=carroImagem[tipoCarro][estadoCarro];
+    piscaCarro=0;
+    carro.altura = al_get_bitmap_height(carro.objetoBitmap);
+    carro.largura = al_get_bitmap_width(carro.objetoBitmap)-50;
 
-    //Declara e inicializa Variavel para contagem de tempo
-    tempExploNave = 999;
-    posColisao = 0;
-    piscaNave=0;
+    tunel1.posX = backGround.posX + TELA_LARGURA;
+    tunel1.posY = 0;
+    tunel1.largura = al_get_bitmap_width(tunel1.objetoBitmap);
+    tunel1.altura = al_get_bitmap_height(tunel1.objetoBitmap);
+    strcpy(txtTunel_1," ");
+
+    tunel2.posX = backGround.posX + TELA_LARGURA;
+    tunel2.posY = 358;
+    tunel2.largura = al_get_bitmap_width(tunel2.objetoBitmap);
+    tunel2.altura = al_get_bitmap_height(tunel2.objetoBitmap);
+    strcpy(txtTunel_2," ");
+
+    tunel3.posX = backGround.posX + TELA_LARGURA;
+    tunel3.posY = 718;
+    tunel3.largura = al_get_bitmap_width(tunel3.objetoBitmap);
+    tunel3.altura = al_get_bitmap_height(tunel3.objetoBitmap);
+    strcpy(txtTunel_3," ");
+
+
+    Quadro.largura = al_get_bitmap_width(Quadro.objetoBitmap);
+    Quadro.altura = al_get_bitmap_height(Quadro.objetoBitmap);
+    Quadro.posX = TELA_LARGURA - Quadro.largura;
+    Quadro.posY = 0 ;
 
     //Carrega scriptTXT
     arq = fopen("exercicios/algoritmo1.txt","r");
@@ -682,14 +595,14 @@ void resetJogo(){
         telaAtual = TELA_ESCOLHA;
     }else{
         for(i=0;i<16;i++){
-            fgets(scriptTXT[i],LIM_COMPRIMENTO_TXT,arq);
+            fgets(scriptTXT[i],TAMANHO_LINHA_ALGORTIMO,arq);
         }
     }
     fclose(arq);
     for(i=0;i<16;i++){
         //Retira a quebra de linha da string e substitui por caracter nulo
         j=0;
-        while(j<LIM_COMPRIMENTO_TXT){
+        while(j<TAMANHO_LINHA_ALGORTIMO){
             if(scriptTXT[i][j]=='\n'){
                 scriptTXT[i][j] = '\0';
                 break;
@@ -700,10 +613,10 @@ void resetJogo(){
     }
     for(i=0;i<16;i++){
         if(identificaOpcao(scriptTXT[i],txtTunel_1,txtTunel_2,txtTunel_3)){
-            printf("\n\n%s\n%s\n%s\n\n",txtTunel_1,txtTunel_2,txtTunel_3);
-            printf("\nContem teste");
+            printf("\nLinha %i: Teste identificado", i);
+            printf("\n\t%s  ||  %s  ||  %s",txtTunel_1,txtTunel_2,txtTunel_3);
         }else{
-            printf("\nNao contem teste");
+            printf("\nLinha %i: Teste nao identificado", i);
         }
     }
 
@@ -763,56 +676,42 @@ void loadBitmap(){
     backGroundPause.objetoBitmap =       al_load_bitmap("img/back/1920/telaPause/telaPause.jpg");
     backGroundRanking.objetoBitmap =     al_load_bitmap("img/back/1920/telaRanking/telaRanking.jpg");
     backGroundFimTempo.objetoBitmap =    al_load_bitmap("img/back/1920/telaFimTempo/TELA_FimTempo.jpg");
-    naveImagem[0][0] =                   al_load_bitmap("img/naves/carro.png");
-    naveImagem[0][1] =                   al_load_bitmap("img/naves/carro.png");
-    naveImagem[0][2] =                   al_load_bitmap("img/naves/carro.png");
-    naveImagem[1][0] =                   al_load_bitmap("img/naves/carro.png");
-    naveImagem[1][1] =                   al_load_bitmap("img/naves/carro.png");
-    naveImagem[1][2] =                   al_load_bitmap("img/naves/carro.png");
-    naveImagem[2][0] =                   al_load_bitmap("img/naves/carro.png");
-    naveImagem[2][1] =                   al_load_bitmap("img/naves/carro.png");
-    naveImagem[2][2] =                   al_load_bitmap("img/naves/carro.png");
-    btNaveZero.objetoBitmap =            al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveZero.png");
-    btNaveUm.objetoBitmap =              al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveUm.png");
-    btNaveDois.objetoBitmap =            al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveDois.png");
+    carroImagem[0][0] =                   al_load_bitmap("img/objetos/carro.png");
+    carroImagem[0][1] =                   al_load_bitmap("img/objetos/carro.png");
+    carroImagem[0][2] =                   al_load_bitmap("img/objetos/carro.png");
+    carroImagem[1][0] =                   al_load_bitmap("img/objetos/carro.png");
+    carroImagem[1][1] =                   al_load_bitmap("img/objetos/carro.png");
+    carroImagem[1][2] =                   al_load_bitmap("img/objetos/carro.png");
+    carroImagem[2][0] =                   al_load_bitmap("img/objetos/carro.png");
+    carroImagem[2][1] =                   al_load_bitmap("img/objetos/carro.png");
+    carroImagem[2][2] =                   al_load_bitmap("img/objetos/carro.png");
+    btCarro1.objetoBitmap =            al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveZero.png");
+    btCarro2.objetoBitmap =              al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveUm.png");
+    btCarro3.objetoBitmap =            al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveDois.png");
     btCenarioEspaco.objetoBitmap =       al_load_bitmap("img/back/1920/telaEscolha/botaoInversoCenarioEspaco.png");
     btCenarioCidade.objetoBitmap =       al_load_bitmap("img/back/1920/telaEscolha/botaoInversoCenarioCidade.png");
     btPlayJogo.objetoBitmap =            al_load_bitmap("img/back/1920/telaEscolha/botaoInversoPlayJogo.png");
-    obst.objetoBitmap =                  al_load_bitmap("img/img_novo/tunel_ajuste.png");
-    obst2.objetoBitmap =                 al_load_bitmap("img/img_novo/tunel_ajuste.png");
-    obst3.objetoBitmap =                 al_load_bitmap("img/img_novo/tunel_ajuste.png");
-    obst4.objetoBitmap =                 al_load_bitmap("img/img_novo/script.png");
-    explo.objetoBitmap =                 al_load_bitmap("img/explo2.png");
-    exploObj.objetoBitmap =              al_load_bitmap("img/exploNave.png");
-    exploObj2.objetoBitmap =             al_load_bitmap("img/exploNave.png");
-    exploObj3.objetoBitmap =             al_load_bitmap("img/exploNave.png");
-    exploObj4.objetoBitmap =             al_load_bitmap("img/exploNave.png");
-    vilao.objetoBitmap =                 al_load_bitmap("img/planetas/planetaUm.png");
+    tunel1.objetoBitmap =                  al_load_bitmap("img/objetos/tunel_ajuste.png");
+    tunel2.objetoBitmap =                 al_load_bitmap("img/objetos/tunel_ajuste.png");
+    tunel3.objetoBitmap =                 al_load_bitmap("img/objetos/tunel_ajuste.png");
+    Quadro.objetoBitmap =                 al_load_bitmap("img/objetos/quadro.png");
     btPlay.objetoBitmap =                al_load_bitmap("img/back/1920/menuInicial/botaoInversoPlay.png");
     btExit.objetoBitmap =                al_load_bitmap("img/back/1920/menuInicial/botaoInversoExit.png");
     btPlayAgain.objetoBitmap =           al_load_bitmap("img/back/1920/telaRanking/botaoInversoPlayAgain.png");
     btQuit.objetoBitmap =                al_load_bitmap("img/back/1920/telaRanking/botaoInversoQuit.png");
     btPlayPause.objetoBitmap =           al_load_bitmap("img/back/1920/telaPause/botaoInversoPlayPause.png");
     btExitPause.objetoBitmap =           al_load_bitmap("img/back/1920/telaPause/botaoInversoExitPause.png");
-    vida1.objetoBitmap =                 al_load_bitmap("img/vidasmall.png");
-    vida2.objetoBitmap =                 al_load_bitmap("img/vidasmall.png");
-    vida3.objetoBitmap =                 al_load_bitmap("img/vidasmall.png");
-    plusTime.objetoBitmap =              al_load_bitmap("img/plusTime.png");
-    plusScore.objetoBitmap =             al_load_bitmap("img/plusScore.png");
-
-    for(i=0;i<NUM_TIROS;i++){
-        tiro[i].objetoBitmap =           al_load_bitmap("img/tiroUm.png");
-    }
 
     // CARREGA FONTES TTF
     textTime.objetoFont =              al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
     textRank.objetoFont =              al_load_font("fonte/cambriab.ttf", 30, ALLEGRO_TTF_NO_KERNING);
+    Quadro.objetoFont =                al_load_font("fonte/cambriab.ttf", 30, ALLEGRO_TTF_NO_KERNING);
     textPlayer.objetoFont =            al_load_font("fonte/alarm_clock/alarm_clock.ttf", 90, ALLEGRO_TTF_NO_KERNING);
     textScoreJogo.objetoFont =         al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
     ultimaChance.objetoFont =          al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
-    obst.objetoFont =                  al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
-    obst2.objetoFont =                 al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
-    obst3.objetoFont =                 al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
+    tunel1.objetoFont =                  al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
+    tunel2.objetoFont =                 al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
+    tunel3.objetoFont =                 al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
 
 }
 void telaMenu(){//----------------------------------------------------FUNCAO RESPONSALVEL PELO MENU
@@ -866,15 +765,15 @@ void telaEscolha(){//----------------------------------------------------FUNCAO 
      }
 
      //Funcoes do mouse
-     if(mousePosicao(btNaveZero.objetoBitmap, btNaveZero.posX, btNaveZero.posY)){
+     if(mousePosicao(btCarro1.objetoBitmap, btCarro1.posX, btCarro1.posY)){
         al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
-        al_draw_bitmap(btNaveZero.objetoBitmap,btNaveZero.posX, btNaveZero.posY, 0);
-     }else if(mousePosicao(btNaveUm.objetoBitmap, btNaveUm.posX, btNaveUm.posY)){
+        al_draw_bitmap(btCarro1.objetoBitmap,btCarro1.posX, btCarro1.posY, 0);
+     }else if(mousePosicao(btCarro2.objetoBitmap, btCarro2.posX, btCarro2.posY)){
         al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
-        al_draw_bitmap(btNaveUm.objetoBitmap,btNaveUm.posX, btNaveUm.posY, 0);
-     }else if(mousePosicao(btNaveDois.objetoBitmap, btNaveDois.posX, btNaveDois.posY)){
+        al_draw_bitmap(btCarro2.objetoBitmap,btCarro2.posX, btCarro2.posY, 0);
+     }else if(mousePosicao(btCarro3.objetoBitmap, btCarro3.posX, btCarro3.posY)){
         al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
-        al_draw_bitmap(btNaveDois.objetoBitmap,btNaveDois.posX, btNaveDois.posY, 0);
+        al_draw_bitmap(btCarro3.objetoBitmap,btCarro3.posX, btCarro3.posY, 0);
      }else if(mousePosicao(btCenarioEspaco.objetoBitmap,btCenarioEspaco.posX, btCenarioEspaco.posY)){
         al_draw_bitmap(btCenarioEspaco.objetoBitmap, btCenarioEspaco.posX, btCenarioEspaco.posY, 0);
         al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
@@ -889,27 +788,25 @@ void telaEscolha(){//----------------------------------------------------FUNCAO 
      }
 
 
-     if(mouseClick(btNaveZero.objetoBitmap, btNaveZero.posX, btNaveZero.posY)){
-        tipoNave=0;
-        naveClick = 1;
-     }else if(mouseClick(btNaveUm.objetoBitmap, btNaveUm.posX, btNaveUm.posY)){
-        tipoNave=1;
-        naveClick = 2;
-     }else if(mouseClick(btNaveDois.objetoBitmap, btNaveDois.posX, btNaveDois.posY)){
-        tipoNave=2;
-        naveClick = 3;
+     if(mouseClick(btCarro1.objetoBitmap, btCarro1.posX, btCarro1.posY)){
+        tipoCarro=0;
+        carroClick = 1;
+     }else if(mouseClick(btCarro2.objetoBitmap, btCarro2.posX, btCarro2.posY)){
+        tipoCarro=1;
+        carroClick = 2;
+     }else if(mouseClick(btCarro3.objetoBitmap, btCarro3.posX, btCarro3.posY)){
+        tipoCarro=2;
+        carroClick = 3;
      }else if(mouseClick(btCenarioEspaco.objetoBitmap, btCenarioEspaco.posX, btCenarioEspaco.posY)){
         cenarioClick = 1;
-        rTime = 255;
-        gTime = 255;
-        bTime = 0;
-        vilao.ativo=true;
+        textTime.textColour_R = 255;
+        textTime.textColour_G = 255;
+        textTime.textColour_B = 0;
      }else if(mouseClick(btCenarioCidade.objetoBitmap, btCenarioCidade.posX, btCenarioCidade.posY)){
         cenarioClick = 2;
-        vilao.ativo=false;
-        rTime = 255;
-        gTime = 20;
-        bTime = 147;
+        textTime.textColour_R = 255;
+        textTime.textColour_G = 20;
+        textTime.textColour_B = 147;
 
      }else if(mouseClick(btPlayJogo.objetoBitmap, btPlayJogo.posX, btPlayJogo.posY)){
         if ((cenarioClick == 1)||(cenarioClick == 2)){
@@ -920,12 +817,12 @@ void telaEscolha(){//----------------------------------------------------FUNCAO 
         }else al_show_native_message_box(janela,"! ! ! ATENCAO ! ! !","PARA PROSSEGUIR, \nESCOLHA UM CENARIO!","",NULL,ALLEGRO_MESSAGEBOX_WARN);
      }
 
-     if (naveClick == 1){
-        al_draw_bitmap(btNaveZero.objetoBitmap, btNaveZero.posX, btNaveZero.posY,0);
-     } else if (naveClick == 2) {
-        al_draw_bitmap(btNaveUm.objetoBitmap, btNaveUm.posX, btNaveUm.posY,0);
-     } else if (naveClick == 3){
-        al_draw_bitmap(btNaveDois.objetoBitmap, btNaveDois.posX, btNaveDois.posY,0);
+     if (carroClick == 1){
+        al_draw_bitmap(btCarro1.objetoBitmap, btCarro1.posX, btCarro1.posY,0);
+     } else if (carroClick == 2) {
+        al_draw_bitmap(btCarro2.objetoBitmap, btCarro2.posX, btCarro2.posY,0);
+     } else if (carroClick == 3){
+        al_draw_bitmap(btCarro3.objetoBitmap, btCarro3.posX, btCarro3.posY,0);
      }
      if (cenarioClick == 1){
         al_draw_bitmap(btCenarioEspaco.objetoBitmap, btCenarioEspaco.posX, btCenarioEspaco.posY,0);
@@ -1103,7 +1000,7 @@ void telaRanking(){//-------------------------------------------------FUNCAO RES
     }
 
     if(mouseClick(btPlayAgain.objetoBitmap, btPlayAgain.posX, btPlayAgain.posY)){
-        naveClick = 0;
+        carroClick = 0;
         cenarioClick = 0;
         jogoSalvo = 0;
         strcpy(nomePlayer,"No DE R.A.");
@@ -1111,7 +1008,6 @@ void telaRanking(){//-------------------------------------------------FUNCAO RES
         caracterPendente=0;
         caracter='\0';
         teclaApagar = 0;
-        resetJogo();
         telaAtual=TELA_ESCOLHA;
      }else if(mouseClick(btQuit.objetoBitmap,btQuit.posX,btQuit.posY)){
          jogoSalvo = 0;
@@ -1130,44 +1026,29 @@ void telaRanking(){//-------------------------------------------------FUNCAO RES
 
 }
 void drawTelaJogo (){
-    int i,posYTextRanking = 60;
+    int i,posYTextQuadro = 60;
     //------------------------------------------------------------Desenha/Atualiza objetos na tela
-    if(tempExploNave>=TEMPO_EXPLOSAO)al_draw_bitmap(backGround.objetoBitmap, backGround.posX, backGround.posY, 0);
-    else al_draw_bitmap(backGroundExplo.objetoBitmap, backGround.posX, backGround.posY, 0);
-    if(vilao.ativo)al_draw_bitmap(vilao.objetoBitmap, vilao.posX, vilao.posY, 0);
-
-    for(i=0;i<NUM_TIROS;i++){
-        if(tiro[i].ativo)al_draw_bitmap(tiro[i].objetoBitmap, tiro[i].posX, tiro[i].posY, 0);
+    al_draw_bitmap(backGround.objetoBitmap, backGround.posX, backGround.posY, 0);
+    if(carro.ativo)al_draw_rotated_bitmap(carro.objetoBitmap, carro.largura/2, carro.altura/2, carro.posX, carro.posY,carro.ang,0);
+    if(tunel1.ativo){
+        al_draw_bitmap(tunel1.objetoBitmap, tunel1.posX, tunel1.posY, 0);
+        al_draw_text(tunel1.objetoFont, al_map_rgb(255, 255, 0), tunel1.posX+100, tunel1.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_1);
     }
-    if(nave.ativo)al_draw_rotated_bitmap(nave.objetoBitmap, nave.largura/2, nave.altura/2, nave.posX, nave.posY,nave.ang,0);
-
-    if(obst.ativo){
-        al_draw_bitmap(obst.objetoBitmap, obst.posX, obst.posY, 0);
-        al_draw_text(obst.objetoFont, al_map_rgb(255, 255, 0), obst.posX+100, obst.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_1);
+    if(tunel2.ativo){
+        al_draw_bitmap(tunel2.objetoBitmap, tunel2.posX, tunel2.posY, 0);
+        al_draw_text(tunel2.objetoFont, al_map_rgb(255, 255, 0), tunel2.posX+100, tunel2.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_2);
     }
-    if(obst2.ativo){
-        al_draw_bitmap(obst2.objetoBitmap, obst2.posX, obst2.posY, 0);
-        al_draw_text(obst2.objetoFont, al_map_rgb(255, 255, 0), obst2.posX+100, obst2.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_2);
+    if(tunel3.ativo){
+        al_draw_bitmap(tunel3.objetoBitmap, tunel3.posX, tunel3.posY, 0);
+        al_draw_text(tunel3.objetoFont, al_map_rgb(255, 255, 0), tunel3.posX+100, tunel3.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_3);
     }
-    if(obst3.ativo){
-        al_draw_bitmap(obst3.objetoBitmap, obst3.posX, obst3.posY, 0);
-        al_draw_text(obst3.objetoFont, al_map_rgb(255, 255, 0), obst3.posX+100, obst3.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_3);
-    }
-    if(obst4.ativo)al_draw_bitmap(obst4.objetoBitmap, obst4.posX, obst4.posY, 0);
-    if(explo.ativo)al_draw_bitmap(explo.objetoBitmap, explo.posX, explo.posY, 0);
-    if(exploObj.ativo)al_draw_bitmap(exploObj.objetoBitmap, exploObj.posX, exploObj.posY, 0);
-    if(exploObj2.ativo)al_draw_bitmap(exploObj2.objetoBitmap, exploObj2.posX, exploObj2.posY, 0);
-    if(exploObj3.ativo)al_draw_bitmap(exploObj3.objetoBitmap, exploObj3.posX, exploObj3.posY, 0);
-    if(exploObj4.ativo)al_draw_bitmap(exploObj4.objetoBitmap, exploObj4.posX, exploObj4.posY, 0);
-    if(plusTime.ativo)al_draw_rotated_bitmap(plusTime.objetoBitmap, (al_get_bitmap_width(plusTime.objetoBitmap))/4, (al_get_bitmap_height(plusTime.objetoBitmap))/4, plusTime.posX, plusTime.posY,plusTime.ang,0);
-    if(plusScore.ativo)al_draw_rotated_bitmap(plusScore.objetoBitmap, (al_get_bitmap_width(plusScore.objetoBitmap))/4, (al_get_bitmap_height(plusScore.objetoBitmap))/5, plusScore.posX, plusScore.posY,plusScore.ang,0);
-    if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(rTime, gTime, bTime), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE: %i",somaScore*progressao);
-    if(textTime.ativo)al_draw_textf(textTime.objetoFont, al_map_rgb(rTime, gTime, bTime), 20 , 10, ALLEGRO_ALIGN_LEFT, "TIME: %i",TEMPO_JOGO_SEGUNDOS - (tempJogo/FPS));
-    if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(rTime, gTime, bTime), ultimaChance.posX-350, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
-
+    if(Quadro.ativo)al_draw_bitmap(Quadro.objetoBitmap, Quadro.posX, Quadro.posY, 0);
+    if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE: %i",somaScore*progressao);
+    if(textTime.ativo)al_draw_textf(textTime.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 20 , 10, ALLEGRO_ALIGN_LEFT, "TIME: %i",TEMPO_JOGO_SEGUNDOS - (tempJogo/FPS));
+    if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), ultimaChance.posX-350, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
     for(i=0;i<16;i++){
-    al_draw_text(textRank.objetoFont, al_map_rgb(255, 255, 0), (float)(TELA_LARGURA-obst4.largura+60), posYTextRanking, ALLEGRO_ALIGN_LEFT, scriptTXT[i]);
-    posYTextRanking += 60;
+    al_draw_text(Quadro.objetoFont, al_map_rgb(255, 255, 0), (float)(TELA_LARGURA-Quadro.largura+30), posYTextQuadro, ALLEGRO_ALIGN_LEFT, scriptTXT[i]);
+    posYTextQuadro += 60;
     }
 }
 void telaJogo(){//----------------------------------------------------FUNCAO RESPONSALVEL PELO JOGO
@@ -1175,68 +1056,59 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
 
     if(posColisao<120){//---------------------------------------------PAUSA APOS OCORRENCIA DE COLISAO(JOGO INATIVO)
         //------------------------------------------------------------MANTEM BACKGROUND EM MOVIMENTO
-        backGround.posX -= nave.vel*0.7;
+        backGround.posX -= carro.vel*0.7;
         if(backGround.posX<=(TELA_LARGURA*-2)){
             backGround.posX=0;
         }
-          //Posicionamento Vilao
-        vilao.posX -= vilao.vel+nave.vel;
-        if (vilao.posX<=-(vilao.largura-10)){
-            vilao.posY = (rand()% (TELA_ALTURA-vilao.altura)) + 0;
-            vilao.posX = (rand()% TELA_LARGURA*1.5) + 2000;
-        }
+
         //------------------------------------------------------------PISCA NAVE ENQUANTO AGUARDA RETOMADA DO JOGO
-        piscaNave++;
-        if(piscaNave>=(120/20)){
-            if(nave.posY!=500){
-                nave.posY=500;
-                nave.posX=150;
-                nave.ang= 2*ALLEGRO_PI;
+        piscaCarro++;
+        if(piscaCarro>=(120/20)){
+            if(carro.ativo==false){
+                carro.ativo = true;
             }else{
-                nave.posY=4800;
+                carro.ativo = false;
             }
-            piscaNave=0;
+            piscaCarro=0;
         }
         posColisao++;
     }else if(posColisao==120){//-------------------------------------RETOMADA DO JOGO APOS COLISAO
         posColisao=4000;
-        nave.posX = 150;
-        nave.posY = 500;
+        carro.ativo = true;
 
     }else{//----------------------------------------------------------ROTINA DO JOGO ATIVO
 
         //------------------------------------------------------------TRATAMENTO DAS POSIÇÕES E VELOCIDADES(TODOS OS OBJETOS)
-        //Posicionamento do background (VELOCIDADE DA NAVE)
-        backGround.posX -= nave.vel*0.7;
+        //Posicionamento do background (VELOCIDADE DO CARRO)
+        backGround.posX -= carro.vel*0.7;
         if(backGround.posX<=(TELA_LARGURA*-2)){
             backGround.posX=0;
-            r = 0;
         }
 
-        //Posicionamento do obst
-        obst.posX = backGround.posX + TELA_LARGURA;
+        //Posicionamento do tunel1
+        tunel1.posX = backGround.posX + TELA_LARGURA;
 
-        //Posicionamento do obst2
-        obst2.posX = backGround.posX + TELA_LARGURA;
+        //Posicionamento do tunel2
+        tunel2.posX = backGround.posX + TELA_LARGURA;
 
-        //Posicionamento do obst3
-        obst3.posX = backGround.posX + TELA_LARGURA;
+        //Posicionamento do tunel3
+        tunel3.posX = backGround.posX + TELA_LARGURA;
 
 
 
         //------------------------------------------------------------TRATAMENTO DAS COLISÕES
-        if (colisao(nave,obst)){
+        if (colisao(carro,tunel1)){
             strcpy(ultChTexto,"TUNEL 1");
             passTunel = 1;
             ultimaChance.ativo = true;
 
 
-        }else if (colisao(nave,obst2)){
+        }else if (colisao(carro,tunel2)){
             strcpy(ultChTexto,"TUNEL 2");
             passTunel = 2;
             ultimaChance.ativo = true;
 
-        }else if (colisao(nave,obst3)){
+        }else if (colisao(carro,tunel3)){
             strcpy(ultChTexto,"TUNEL 3");
             passTunel = 3;
             ultimaChance.ativo = true;
@@ -1253,56 +1125,56 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
 
         //------------------------------------------------------------LIMITE SUP E INF
         //----------LIMITES DA TELA
-        if (nave.posY <= nave.altura/2){
-            nave.posY = nave.altura/2;
+        if (carro.posY <= carro.altura/2){
+            carro.posY = carro.altura/2;
         }
-        if (nave.posY >= TELA_ALTURA-nave.altura/2){
-            nave.posY =  TELA_ALTURA-nave.altura/2;
+        if (carro.posY >= TELA_ALTURA-carro.altura/2){
+            carro.posY =  TELA_ALTURA-carro.altura/2;
         }
 
-        if (nave.posX <= nave.largura/2){
-            nave.posX = nave.largura/2;
+        if (carro.posX <= carro.largura/2){
+            carro.posX = carro.largura/2;
         }
-        if (nave.posX >= TELA_LARGURA-nave.largura/2){
-            nave.posX =  TELA_LARGURA-nave.largura/2;
+        if (carro.posX >= TELA_LARGURA-carro.largura/2){
+            carro.posX =  TELA_LARGURA-carro.largura/2;
         }
 
         //----------LIMITES DO TUNEL
         switch(passTunel){
         case 1:
-            if (nave.posY >= FAIXA1_POS_Y-nave.altura/2){
-            nave.posY =  FAIXA1_POS_Y-nave.altura/2;
+            if (carro.posY >= FAIXA1_POS_Y-carro.altura/2){
+            carro.posY =  FAIXA1_POS_Y-carro.altura/2;
         }
             break;
         case 2:
-            if (nave.posY <= FAIXA1_POS_Y + nave.altura/2){
-                nave.posY = FAIXA1_POS_Y + nave.altura/2;
-            }else if(nave.posY >= FAIXA2_POS_Y-nave.altura/2){
-                nave.posY =  FAIXA2_POS_Y-nave.altura/2;
+            if (carro.posY <= FAIXA1_POS_Y + carro.altura/2){
+                carro.posY = FAIXA1_POS_Y + carro.altura/2;
+            }else if(carro.posY >= FAIXA2_POS_Y-carro.altura/2){
+                carro.posY =  FAIXA2_POS_Y-carro.altura/2;
             }
             break;
         case 3:
-            if (nave.posY <= FAIXA2_POS_Y + nave.altura/2){
-                nave.posY = FAIXA2_POS_Y + nave.altura/2;
+            if (carro.posY <= FAIXA2_POS_Y + carro.altura/2){
+                carro.posY = FAIXA2_POS_Y + carro.altura/2;
             }
             break;
         }
 
         //------------------------------------------------------------CONTROLES DO TECLADO
         if(cima){
-            nave.posY-= velDesloc;
-            nave.ang=(6.05865);
+            carro.posY-= velDesloc;
+            //carro.ang=(6.05865);
         }else if(baixo){
-            nave.posY+= velDesloc;
-            nave.ang=(0.124533);
+            carro.posY+= velDesloc;
+            //carro.ang=(0.124533);
         }else{
-            nave.ang= 2*ALLEGRO_PI;
+            carro.ang= 2*ALLEGRO_PI;
         }
-        if(freia){
-            nave.posX-= velDesloc;
+        if(esquerda){
+            carro.posX-= velDesloc;
         }
-        if(acelera){
-            nave.posX+= velDesloc;
+        if(direita){
+            carro.posX+= velDesloc;
         }
 
     }
@@ -1320,178 +1192,124 @@ void telaFimTempo(){
 void inicializaObjetos(){
     int i;
     backGround.ativo=true;
-    backGroundExplo.ativo=true;
+    backGround.posX=0;
+    backGround.posY=0;
+
     backGroundCidade.ativo=true;
-    cenario1.ativo=true;
-    cenario2.ativo=true;
-    cenario3.ativo=true;
     backGroundMenu.ativo=true;
     backGroundEscolha.ativo=true;
     backGroundRanking.ativo=true;
     backGroundPause.ativo=true;
     backGroundFimTempo.ativo=true;
-    nave.ativo=true;
 
-    for(i=0;i<NUM_TIROS;i++){
-        tiro[i].ativo=false;
-    }
+    carro.ativo=true;
+    carro.posX = 200;
+    carro.posY= 500;
+    carro.xColisao = -90;
+    carro.yColisao = -70;
+    carro.x1Colisao = -90;
+    carro.y1Colisao = -100;
+    carro.ang= 2*ALLEGRO_PI;
+    carro.vel= 10;
 
-    obst.ativo=true;
-    obst2.ativo=true;
-    obst3.ativo=true;
-    obst4.ativo=true;
-    explo.ativo=true;
-    exploObj.ativo=true;
-    exploObj2.ativo=true;
-    exploObj3.ativo=true;
-    exploObj4.ativo=true;
-    vilao.ativo=true;
+    tunel1.ativo=true;
+    tunel1.posX = backGround.posX + TELA_LARGURA;
+    tunel1.posY = 1*(TELA_ALTURA/5);
+    tunel1.xColisao = 30;
+    tunel1.yColisao = 10;
+    tunel1.x1Colisao = -30;
+    tunel1.y1Colisao = -10;
+    tunel1.vel  = 4;
+
+    tunel2.ativo=true;
+    tunel2.posX = backGround.posX + TELA_LARGURA;
+    tunel2.posY = 2*(TELA_ALTURA/5);
+    tunel2.xColisao = 30;
+    tunel2.yColisao = 10;
+    tunel2.x1Colisao = -30;
+    tunel2.y1Colisao = -10;
+    tunel2.vel = 4;
+
+    tunel3.ativo=true;
+    tunel3.posX = backGround.posX + TELA_LARGURA;
+    tunel3.posY = 3*(TELA_ALTURA/5);
+    tunel3.xColisao = 30;
+    tunel3.yColisao = 10;
+    tunel3.x1Colisao = -30;
+    tunel3.y1Colisao = -10;
+    tunel3.vel = 4;
+
+    Quadro.ativo=true;
+    Quadro.posX = TELA_LARGURA - Quadro.largura;
+    Quadro.posY = 0;
+    Quadro.xColisao = 30;
+    Quadro.yColisao = 10;
+    Quadro.x1Colisao = -30;
+    Quadro.y1Colisao = -10;
+    Quadro.vel = 4;
+
     btPlay.ativo=true;
-    btExit.ativo=true;
-    btPlayAgain.ativo=true;
-    btQuit.ativo=true;
-    btNaveZero.ativo=true;
-    btNaveUm.ativo=true;
-    btNaveDois.ativo=true;
-    btCenarioEspaco.ativo=true;
-    btCenarioCidade.ativo=true;
-    btPlayJogo.ativo=true;
-    btPlayPause.ativo=true;
-    btExitPause.ativo=true;
-    vida1.ativo=true;
-    vida2.ativo=true;
-    vida3.ativo=true;
-    plusTime.ativo=true;
-    plusScore.ativo=true;
-    textTime.ativo=true;
-    textRank.ativo=true;
-    textScoreJogo.ativo=true;
-    textPlayer.ativo=true;
-    ultimaChance.ativo=true;
-
-
-
-    backGround.posX=0;
-    nave.posX = 200;
-    nave.xColisao = -90;
-    nave.yColisao = -70;
-    nave.x1Colisao = -90;
-    nave.y1Colisao = -100;
-
-    for(i=0;i<NUM_TIROS;i++){
-        tiro[i].posX = 100;
-        tiro[i].xColisao = 0;
-        tiro[i].yColisao = 0;
-        tiro[i].x1Colisao = 0;
-        tiro[i].y1Colisao = 0;
-    }
-
-    explo.posX = 0;
-    obst.posX = backGround.posX + TELA_LARGURA;
-    obst.xColisao = 30;
-    obst.yColisao = 10;
-    obst.x1Colisao = -30;
-    obst.y1Colisao = -10;
-
-    obst2.posX = backGround.posX + TELA_LARGURA;
-    obst2.xColisao = 30;
-    obst2.yColisao = 10;
-    obst2.x1Colisao = -30;
-    obst2.y1Colisao = -10;
-
-    obst3.posX = backGround.posX + TELA_LARGURA;
-    obst3.xColisao = 30;
-    obst3.yColisao = 10;
-    obst3.x1Colisao = -30;
-    obst3.y1Colisao = -10;
-
-    obst4.posX = backGround.posX + TELA_LARGURA;
-    obst4.xColisao = 30;
-    obst4.yColisao = 10;
-    obst4.x1Colisao = -30;
-    obst4.y1Colisao = -10;
-
-    vilao.posX = -5000;
     btPlay.posX = 496;
-    btExit.posX = 1032;
-    btPlayAgain.posX = 807;
-    btQuit.posX = 1430;
-    btNaveZero.posX = 303;
-    btNaveUm.posX = 303;
-    btNaveDois.posX = 303;
-    btCenarioEspaco.posX = 1503;
-    btCenarioCidade.posX = 1515;
-    btPlayJogo.posX = 840;
-    btPlayPause.posX = 248;
-    btExitPause.posX = 1462;
-    vida1.posX = 1600;
-    vida2.posX = 1700;
-    vida3.posX = 1800;
-    ultimaChance.posX = 1300;
-    textTime.posX = 20;
-    plusTime.posX = 4000;
-    plusTime.xColisao = 0;
-    plusTime.yColisao = 0;
-    plusTime.x1Colisao = 0;
-    plusTime.y1Colisao = 0;
-    plusScore.posX = 4000;
-    plusScore.xColisao = 0;
-    plusScore.yColisao = 0;
-    plusScore.x1Colisao = 0;
-    plusScore.y1Colisao = 0;
-
-
-    backGround.posY=0;
-    nave.posY= 500;
-    for(i=0;i<NUM_TIROS;i++){
-        tiro[i].posY = -1000;
-    }
-
-    obst.posY = 1*(TELA_ALTURA/5);
-    obst2.posY = 2*(TELA_ALTURA/5);
-    obst3.posY = 3*(TELA_ALTURA/5);
-    obst4.posY = 4*(TELA_ALTURA/5);
-    explo.posY = 3999;
-    vilao.posY = 3000;
     btPlay.posY = 560;
+
+    btExit.ativo=true;
+    btExit.posX = 1032;
     btExit.posY = 560;
+
+    btPlayAgain.ativo=true;
+    btPlayAgain.posX = 807;
     btPlayAgain.posY = 110;
+
+    btQuit.ativo=true;
+    btQuit.posX = 1430;
     btQuit.posY = 110;
-    btNaveZero.posY = 85;
-    btNaveUm.posY = 390;
-    btNaveDois.posY = 690;
+
+    btCarro1.ativo=true;
+    btCarro1.posX = 303;
+    btCarro1.posY = 85;
+
+    btCarro2.ativo=true;
+    btCarro2.posX = 303;
+    btCarro2.posY = 390;
+
+    btCarro3.ativo=true;
+    btCarro3.posX = 303;
+    btCarro3.posY = 690;
+
+    btCenarioEspaco.ativo=true;
+    btCenarioEspaco.posX = 1503;
     btCenarioEspaco.posY = 160;
+
+    btCenarioCidade.ativo=true;
+    btCenarioCidade.posX = 1515;
     btCenarioCidade.posY = 620;
+
+    btPlayJogo.ativo=true;
+    btPlayJogo.posX = 840;
     btPlayJogo.posY = 738;
+
+    btPlayPause.ativo=true;
+    btPlayPause.posX = 248;
     btPlayPause.posY = 283;
+
+    btExitPause.ativo=true;
+    btExitPause.posX = 1462;
     btExitPause.posY = 280;
-    vida1.posY = 10;
-    vida2.posY = 10;
-    vida3.posY = 10;
-    ultimaChance.posY = 20;
+
+    textTime.ativo=true;
+    textTime.posX = 20;
     textTime.posY = 20;
-    plusTime.posY = 2000;
-    plusScore.posY = 2000;
+    textTime.textColour_R = 0;
+    textTime.textColour_G = 255;
+    textTime.textColour_B = 255;
 
-    nave.ang= 2*ALLEGRO_PI;
-    obst.ang= 0.0;
-    obst2.ang= 0.0;
-    obst3.ang = 0.0;
-    obst4.ang = 0.0;
-    plusTime.ang = 0.0;
-    plusScore.ang = 0.0;
+    textRank.ativo=true;
 
-    nave.vel= 10;
-    for(i=0;i<NUM_TIROS;i++){
-        tiro[i].vel = 15;
-        tiro[i].vel = 15;
-    }
+    textScoreJogo.ativo=true;
 
-    obst.vel  = 4;
-    obst2.vel = 4;
-    obst3.vel = 4;
-    obst4.vel = 4;
-    vilao.vel = 4;
-    plusTime.vel = 4;
-    plusScore.vel = 4;
+    textPlayer.ativo=true;
+
+    ultimaChance.ativo=true;
+    ultimaChance.posX = 1300;
+    ultimaChance.posY = 20;
 }
