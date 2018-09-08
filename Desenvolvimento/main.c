@@ -16,7 +16,7 @@
 #define     TELA_LARGURA            1920
 #define     TELA_ALTURA             1080
 #define     TOLERANCIA              5
-#define     TEMPO_JOGO_SEGUNDOS     60
+#define     TEMPO_JOGO_SEGUNDOS     300
 #define     TEMPO_EXPLOSAO          15  //tempo em segundos = TEMPO_EXPLOSAO/60
 #define     TELA_MENU               0
 #define     TELA_ESCOLHA            1
@@ -29,6 +29,10 @@
 #define     FAIXA1_POS_Y            362
 #define     FAIXA2_POS_Y            718
 #define     TAMANHO_LINHA_ALGORTIMO 200
+#define     QTDE_LINHAS_ALGORITMO   16
+#define     TUNEL_1                 0
+#define     TUNEL_2                 1
+#define     TUNEL_3                 2
 
 //----------------------------------------------------DECLARAÇÃO DE VARIÁVEIS GLOBAIS
 // Ponteiro representando a janela principal
@@ -54,6 +58,7 @@ typedef struct{
     int textColour_R;
     int textColour_G;
     int textColour_B;
+    char texto[200];
     ALLEGRO_BITMAP *objetoBitmap;
     ALLEGRO_FONT *objetoFont;
 }Objeto;
@@ -87,12 +92,16 @@ Objeto textRank;
 Objeto textScoreJogo;
 Objeto textPlayer;
 Objeto ultimaChance;
+Objeto seta;
 
 
 //Declara e inicializa Variaveis de controle do jogo
 int passTunel= 0; //Armazena numero do tunel que o carro passou
-char txtTunel_1[TAMANHO_LINHA_ALGORTIMO],txtTunel_2[TAMANHO_LINHA_ALGORTIMO],txtTunel_3[TAMANHO_LINHA_ALGORTIMO];
-char scriptTXT[16][TAMANHO_LINHA_ALGORTIMO];
+int proxLinha = 0;
+char txtTunel_1[QTDE_LINHAS_ALGORITMO][TAMANHO_LINHA_ALGORTIMO];
+char txtTunel_2[QTDE_LINHAS_ALGORITMO][TAMANHO_LINHA_ALGORTIMO];
+char txtTunel_3[QTDE_LINHAS_ALGORITMO][TAMANHO_LINHA_ALGORTIMO];
+char scriptTXT[QTDE_LINHAS_ALGORITMO][TAMANHO_LINHA_ALGORTIMO];
 char ultChTexto[10];
 bool sair = 0;
 bool pause = 0;
@@ -102,10 +111,10 @@ int somaScore = 0;
 int tempJogo=0;
 int telaAtual=TELA_MENU;
 char nomePlayer[TAMANHO_NOME_PLAYER]={"No DE R.A."};
-int posColisao = 4000;
+int inicializacao = 4000;
 int piscaCarro=0;
 int tempTelaFimTempo = 0;
-int progressao = 10;
+int progressao = 1;
 int tipoCarro = 0;
 int estadoCarro = 0;
 int carroClick = 0;
@@ -113,6 +122,7 @@ int cenarioClick = 0;
 int rankingScore[NUM_JOGADORES],i;
 char rankingPlayers[NUM_JOGADORES][50];
 float velDesloc = 8;
+int qtdeTestes = 0;
 
 //Variaveis para controle do teclado
 bool cima = 0;
@@ -138,6 +148,11 @@ BRANCO E AS 3 ALTERNATIVAS POSSÍVEIS, DEVOLVE LINHA
 FORMATADA: "_ _ _ _"
 ----------------------------------------------------*/
 bool identificaOpcao(char *txt,char *op1,char *op2,char *op3);
+/*----------------------------------------------------
+Randomiza ordem dos textos dos Tuneis. index se refere a qual
+linha do algoritmo o programa esta.
+----------------------------------------------------*/
+void inverteOrdemTxt(int index);
 /*----------------------------------------------------
 ATRIBUI OS VALORES INICIAIS AS VARIÁVEIS RELACIONADAS
 A TELA JOGO ANTES DE INICIAR UMA NOVA PARTIDA
@@ -532,6 +547,31 @@ bool identificaOpcao(char *txt,char *op1,char *op2,char *op3){
 	return ok;
 }
 
+void inverteOrdemTxt(int index){
+    int chave = (rand() % 4)+ 1;
+    switch(chave){
+    case 1:
+        strcpy(tunel1.texto,txtTunel_1[index]);
+        strcpy(tunel2.texto,txtTunel_2[index]);
+        strcpy(tunel3.texto,txtTunel_3[index]);
+        break;
+    case 2:
+        strcpy(tunel2.texto,txtTunel_1[index]);
+        strcpy(tunel3.texto,txtTunel_2[index]);
+        strcpy(tunel1.texto,txtTunel_3[index]);
+        break;
+    case 3:
+        strcpy(tunel3.texto,txtTunel_1[index]);
+        strcpy(tunel1.texto,txtTunel_2[index]);
+        strcpy(tunel2.texto,txtTunel_3[index]);
+        break;
+    default:
+        strcpy(tunel3.texto,txtTunel_1[index]);
+        strcpy(tunel2.texto,txtTunel_2[index]);
+        strcpy(tunel1.texto,txtTunel_3[index]);
+        break;
+    }
+}
 
 void resetJogo(){
     FILE *arq = NULL; //arquivo para carregar Algoritmos
@@ -543,10 +583,12 @@ void resetJogo(){
     }
 
     passTunel= 0;
+    proxLinha = 0;
+    qtdeTestes = 0;
     score = 0;
     somaScore = 0;
     tempJogo=0;
-    posColisao = 0;
+    inicializacao = 0;
     ultimaChance.ativo = 0;
     ultimaChance.temp = 0;
 
@@ -555,7 +597,7 @@ void resetJogo(){
 
     carro.posX = 150;
     carro.posY=500;
-    carro.vel= 10;
+    carro.vel= 7;
     velDesloc = rand()%5 + 6;
     carro.ang= 2*ALLEGRO_PI;
     estadoCarro = 0;
@@ -564,23 +606,29 @@ void resetJogo(){
     carro.altura = al_get_bitmap_height(carro.objetoBitmap);
     carro.largura = al_get_bitmap_width(carro.objetoBitmap)-50;
 
-    tunel1.posX = backGround.posX + TELA_LARGURA;
+    //tunel1.posX = backGround.posX + TELA_LARGURA;
     tunel1.posY = 0;
     tunel1.largura = al_get_bitmap_width(tunel1.objetoBitmap);
     tunel1.altura = al_get_bitmap_height(tunel1.objetoBitmap);
     strcpy(txtTunel_1," ");
+    //
+    tunel1.posX = TELA_LARGURA+2*tunel1.largura;
 
-    tunel2.posX = backGround.posX + TELA_LARGURA;
+    //tunel2.posX = backGround.posX + TELA_LARGURA;
     tunel2.posY = 358;
     tunel2.largura = al_get_bitmap_width(tunel2.objetoBitmap);
     tunel2.altura = al_get_bitmap_height(tunel2.objetoBitmap);
     strcpy(txtTunel_2," ");
+    //
+    tunel2.posX = TELA_LARGURA+2*tunel1.largura;
 
-    tunel3.posX = backGround.posX + TELA_LARGURA;
+    //tunel3.posX = backGround.posX + TELA_LARGURA;
     tunel3.posY = 718;
     tunel3.largura = al_get_bitmap_width(tunel3.objetoBitmap);
     tunel3.altura = al_get_bitmap_height(tunel3.objetoBitmap);
     strcpy(txtTunel_3," ");
+    //
+    tunel3.posX = TELA_LARGURA+2*tunel1.largura;
 
 
     Quadro.largura = al_get_bitmap_width(Quadro.objetoBitmap);
@@ -588,18 +636,24 @@ void resetJogo(){
     Quadro.posX = TELA_LARGURA - Quadro.largura;
     Quadro.posY = 0 ;
 
+    seta.largura = al_get_bitmap_width(seta.objetoBitmap);
+    seta.altura = al_get_bitmap_height(seta.objetoBitmap);
+    seta.posX = TELA_LARGURA - Quadro.largura - 30;
+    seta.posY = 60;
+    seta.temp = 0;
+
     //Carrega scriptTXT
     arq = fopen("exercicios/algoritmo1.txt","r");
     if(arq==NULL){
         al_show_native_message_box(janela,"NAO HA EXERCICOS CADASTRADOS !!!","INSIRA UM ARQUIVO ALGORITMO1.TXT\nNA PASTA EXERCICIOS!","",NULL,ALLEGRO_MESSAGEBOX_WARN);
         telaAtual = TELA_ESCOLHA;
     }else{
-        for(i=0;i<16;i++){
+        for(i=0;i<QTDE_LINHAS_ALGORITMO;i++){
             fgets(scriptTXT[i],TAMANHO_LINHA_ALGORTIMO,arq);
         }
     }
     fclose(arq);
-    for(i=0;i<16;i++){
+    for(i=0;i<QTDE_LINHAS_ALGORITMO;i++){
         //Retira a quebra de linha da string e substitui por caracter nulo
         j=0;
         while(j<TAMANHO_LINHA_ALGORTIMO){
@@ -611,14 +665,23 @@ void resetJogo(){
         }
 
     }
-    for(i=0;i<16;i++){
-        if(identificaOpcao(scriptTXT[i],txtTunel_1,txtTunel_2,txtTunel_3)){
+    //Limpa os vetores txtTunel
+    for(i=0;i<QTDE_LINHAS_ALGORITMO;i++){
+        strcpy(txtTunel_1[i]," ");
+        strcpy(txtTunel_2[i]," ");
+        strcpy(txtTunel_3[i]," ");
+    }
+    //Preence os vetores txtTunel com as strings do arquivo
+    for(i=0;i<QTDE_LINHAS_ALGORITMO;i++){
+        if(identificaOpcao(scriptTXT[i],txtTunel_1[i],txtTunel_2[i],txtTunel_3[i])){
             printf("\nLinha %i: Teste identificado", i);
-            printf("\n\t%s  ||  %s  ||  %s",txtTunel_1,txtTunel_2,txtTunel_3);
+            printf("\n\t%s  ||  %s  ||  %s",txtTunel_1[i],txtTunel_2[i],txtTunel_3[i]);
         }else{
             printf("\nLinha %i: Teste nao identificado", i);
         }
     }
+    //Randomiza ordem dos textos dos Tuneis
+    inverteOrdemTxt(0);
 
 }
 bool colisao(Objeto obj1, Objeto obj2){
@@ -676,42 +739,43 @@ void loadBitmap(){
     backGroundPause.objetoBitmap =       al_load_bitmap("img/back/1920/telaPause/telaPause.jpg");
     backGroundRanking.objetoBitmap =     al_load_bitmap("img/back/1920/telaRanking/telaRanking.jpg");
     backGroundFimTempo.objetoBitmap =    al_load_bitmap("img/back/1920/telaFimTempo/TELA_FimTempo.jpg");
-    carroImagem[0][0] =                   al_load_bitmap("img/objetos/carro.png");
-    carroImagem[0][1] =                   al_load_bitmap("img/objetos/carro.png");
-    carroImagem[0][2] =                   al_load_bitmap("img/objetos/carro.png");
-    carroImagem[1][0] =                   al_load_bitmap("img/objetos/carro.png");
-    carroImagem[1][1] =                   al_load_bitmap("img/objetos/carro.png");
-    carroImagem[1][2] =                   al_load_bitmap("img/objetos/carro.png");
-    carroImagem[2][0] =                   al_load_bitmap("img/objetos/carro.png");
-    carroImagem[2][1] =                   al_load_bitmap("img/objetos/carro.png");
-    carroImagem[2][2] =                   al_load_bitmap("img/objetos/carro.png");
-    btCarro1.objetoBitmap =            al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveZero.png");
+    carroImagem[0][0] =                  al_load_bitmap("img/objetos/carro.png");
+    carroImagem[0][1] =                  al_load_bitmap("img/objetos/carro.png");
+    carroImagem[0][2] =                  al_load_bitmap("img/objetos/carro.png");
+    carroImagem[1][0] =                  al_load_bitmap("img/objetos/carro.png");
+    carroImagem[1][1] =                  al_load_bitmap("img/objetos/carro.png");
+    carroImagem[1][2] =                  al_load_bitmap("img/objetos/carro.png");
+    carroImagem[2][0] =                  al_load_bitmap("img/objetos/carro.png");
+    carroImagem[2][1] =                  al_load_bitmap("img/objetos/carro.png");
+    carroImagem[2][2] =                  al_load_bitmap("img/objetos/carro.png");
+    btCarro1.objetoBitmap =              al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveZero.png");
     btCarro2.objetoBitmap =              al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveUm.png");
-    btCarro3.objetoBitmap =            al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveDois.png");
+    btCarro3.objetoBitmap =              al_load_bitmap("img/back/1920/telaEscolha/botaoInversoNaveDois.png");
     btCenarioEspaco.objetoBitmap =       al_load_bitmap("img/back/1920/telaEscolha/botaoInversoCenarioEspaco.png");
     btCenarioCidade.objetoBitmap =       al_load_bitmap("img/back/1920/telaEscolha/botaoInversoCenarioCidade.png");
     btPlayJogo.objetoBitmap =            al_load_bitmap("img/back/1920/telaEscolha/botaoInversoPlayJogo.png");
-    tunel1.objetoBitmap =                  al_load_bitmap("img/objetos/tunel_ajuste.png");
-    tunel2.objetoBitmap =                 al_load_bitmap("img/objetos/tunel_ajuste.png");
-    tunel3.objetoBitmap =                 al_load_bitmap("img/objetos/tunel_ajuste.png");
-    Quadro.objetoBitmap =                 al_load_bitmap("img/objetos/quadro.png");
+    tunel1.objetoBitmap =                al_load_bitmap("img/objetos/tunel_ajuste.png");
+    tunel2.objetoBitmap =                al_load_bitmap("img/objetos/tunel_ajuste.png");
+    tunel3.objetoBitmap =                al_load_bitmap("img/objetos/tunel_ajuste.png");
+    Quadro.objetoBitmap =                al_load_bitmap("img/objetos/quadro.png");
     btPlay.objetoBitmap =                al_load_bitmap("img/back/1920/menuInicial/botaoInversoPlay.png");
     btExit.objetoBitmap =                al_load_bitmap("img/back/1920/menuInicial/botaoInversoExit.png");
     btPlayAgain.objetoBitmap =           al_load_bitmap("img/back/1920/telaRanking/botaoInversoPlayAgain.png");
     btQuit.objetoBitmap =                al_load_bitmap("img/back/1920/telaRanking/botaoInversoQuit.png");
     btPlayPause.objetoBitmap =           al_load_bitmap("img/back/1920/telaPause/botaoInversoPlayPause.png");
     btExitPause.objetoBitmap =           al_load_bitmap("img/back/1920/telaPause/botaoInversoExitPause.png");
+    seta.objetoBitmap =                  al_load_bitmap("img/objetos/seta.jpg");
 
     // CARREGA FONTES TTF
-    textTime.objetoFont =              al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
-    textRank.objetoFont =              al_load_font("fonte/cambriab.ttf", 30, ALLEGRO_TTF_NO_KERNING);
-    Quadro.objetoFont =                al_load_font("fonte/cambriab.ttf", 30, ALLEGRO_TTF_NO_KERNING);
-    textPlayer.objetoFont =            al_load_font("fonte/alarm_clock/alarm_clock.ttf", 90, ALLEGRO_TTF_NO_KERNING);
-    textScoreJogo.objetoFont =         al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
-    ultimaChance.objetoFont =          al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
+    textTime.objetoFont =                al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
+    textRank.objetoFont =                al_load_font("fonte/cambriab.ttf", 30, ALLEGRO_TTF_NO_KERNING);
+    Quadro.objetoFont =                  al_load_font("fonte/cambriab.ttf", 30, ALLEGRO_TTF_NO_KERNING);
+    textPlayer.objetoFont =              al_load_font("fonte/alarm_clock/alarm_clock.ttf", 90, ALLEGRO_TTF_NO_KERNING);
+    textScoreJogo.objetoFont =           al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
+    ultimaChance.objetoFont =            al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
     tunel1.objetoFont =                  al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
-    tunel2.objetoFont =                 al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
-    tunel3.objetoFont =                 al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
+    tunel2.objetoFont =                  al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
+    tunel3.objetoFont =                  al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
 
 }
 void telaMenu(){//----------------------------------------------------FUNCAO RESPONSALVEL PELO MENU
@@ -1032,38 +1096,39 @@ void drawTelaJogo (){
     if(carro.ativo)al_draw_rotated_bitmap(carro.objetoBitmap, carro.largura/2, carro.altura/2, carro.posX, carro.posY,carro.ang,0);
     if(tunel1.ativo){
         al_draw_bitmap(tunel1.objetoBitmap, tunel1.posX, tunel1.posY, 0);
-        al_draw_text(tunel1.objetoFont, al_map_rgb(255, 255, 0), tunel1.posX+100, tunel1.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_1);
+        al_draw_text(tunel1.objetoFont, al_map_rgb(255, 255, 0), tunel1.posX+100, tunel1.posY+100, ALLEGRO_ALIGN_LEFT, tunel1.texto);
     }
     if(tunel2.ativo){
         al_draw_bitmap(tunel2.objetoBitmap, tunel2.posX, tunel2.posY, 0);
-        al_draw_text(tunel2.objetoFont, al_map_rgb(255, 255, 0), tunel2.posX+100, tunel2.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_2);
+        al_draw_text(tunel2.objetoFont, al_map_rgb(255, 255, 0), tunel2.posX+100, tunel2.posY+100, ALLEGRO_ALIGN_LEFT, tunel2.texto);
     }
     if(tunel3.ativo){
         al_draw_bitmap(tunel3.objetoBitmap, tunel3.posX, tunel3.posY, 0);
-        al_draw_text(tunel3.objetoFont, al_map_rgb(255, 255, 0), tunel3.posX+100, tunel3.posY+100, ALLEGRO_ALIGN_LEFT, txtTunel_3);
+        al_draw_text(tunel3.objetoFont, al_map_rgb(255, 255, 0), tunel3.posX+100, tunel3.posY+100, ALLEGRO_ALIGN_LEFT, tunel3.texto);
     }
     if(Quadro.ativo)al_draw_bitmap(Quadro.objetoBitmap, Quadro.posX, Quadro.posY, 0);
+    if(seta.ativo)al_draw_bitmap(seta.objetoBitmap, seta.posX-10, seta.posY-10, 0);
+
     if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE: %i",somaScore*progressao);
     if(textTime.ativo)al_draw_textf(textTime.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 20 , 10, ALLEGRO_ALIGN_LEFT, "TIME: %i",TEMPO_JOGO_SEGUNDOS - (tempJogo/FPS));
     if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), ultimaChance.posX-350, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
-    for(i=0;i<16;i++){
+    for(i=0;i<QTDE_LINHAS_ALGORITMO;i++){
     al_draw_text(Quadro.objetoFont, al_map_rgb(255, 255, 0), (float)(TELA_LARGURA-Quadro.largura+30), posYTextQuadro, ALLEGRO_ALIGN_LEFT, scriptTXT[i]);
     posYTextQuadro += 60;
     }
 }
 void telaJogo(){//----------------------------------------------------FUNCAO RESPONSALVEL PELO JOGO
-    int i,r;
+    int i;
 
-    if(posColisao<120){//---------------------------------------------PAUSA APOS OCORRENCIA DE COLISAO(JOGO INATIVO)
+    if(inicializacao<200){//---------------------------------------------PAUSA APOS OCORRENCIA DE COLISAO(JOGO INATIVO)
         //------------------------------------------------------------MANTEM BACKGROUND EM MOVIMENTO
-        backGround.posX -= carro.vel*0.7;
+        backGround.posX -= carro.vel;
         if(backGround.posX<=(TELA_LARGURA*-2)){
             backGround.posX=0;
         }
-
         //------------------------------------------------------------PISCA NAVE ENQUANTO AGUARDA RETOMADA DO JOGO
         piscaCarro++;
-        if(piscaCarro>=(120/20)){
+        if(piscaCarro>=(200/40)){
             if(carro.ativo==false){
                 carro.ativo = true;
             }else{
@@ -1071,57 +1136,95 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
             }
             piscaCarro=0;
         }
-        posColisao++;
-    }else if(posColisao==120){//-------------------------------------RETOMADA DO JOGO APOS COLISAO
-        posColisao=4000;
+        inicializacao++;
+    }else if(inicializacao==200){//-------------------------------------RETOMADA DO JOGO APOS COLISAO
+        inicializacao=4000;
         carro.ativo = true;
 
     }else{//----------------------------------------------------------ROTINA DO JOGO ATIVO
 
         //------------------------------------------------------------TRATAMENTO DAS POSIÇÕES E VELOCIDADES(TODOS OS OBJETOS)
         //Posicionamento do background (VELOCIDADE DO CARRO)
-        backGround.posX -= carro.vel*0.7;
+        backGround.posX -= carro.vel;
+
         if(backGround.posX<=(TELA_LARGURA*-2)){
             backGround.posX=0;
         }
 
-        //Posicionamento do tunel1
-        tunel1.posX = backGround.posX + TELA_LARGURA;
-
-        //Posicionamento do tunel2
-        tunel2.posX = backGround.posX + TELA_LARGURA;
-
-        //Posicionamento do tunel3
-        tunel3.posX = backGround.posX + TELA_LARGURA;
+        //Posicionamento dos tuneis 1, 2 e 3
+        if(tunel1.posX<-tunel1.largura*3){
+            tunel1.posX = TELA_LARGURA + tunel1.largura*2;
+            tunel2.posX = tunel1.posX;
+            tunel3.posX = tunel2.posX;
+            if(proxLinha>QTDE_LINHAS_ALGORITMO){
+                telaAtual = TELA_RANKING;
+            }else {
+                proxLinha++;
+                seta.posY += 60;
+                inverteOrdemTxt(proxLinha);
+            }
+        }else{
+            tunel1.posX -= carro.vel;
+            tunel2.posX = tunel1.posX;
+            tunel3.posX = tunel2.posX;
+        }
 
 
 
         //------------------------------------------------------------TRATAMENTO DAS COLISÕES
         if (colisao(carro,tunel1)){
-            strcpy(ultChTexto,"TUNEL 1");
             passTunel = 1;
-            ultimaChance.ativo = true;
-
-
+            if(strcmp(txtTunel_1[proxLinha]," ")!=0){
+                ultimaChance.ativo = true;
+                if(strcmp(tunel1.texto,txtTunel_1[proxLinha])==0){
+                    strcpy(ultChTexto,"ACERTOU!!!");
+                    //somaScore += 50;
+                }else{
+                    strcpy(ultChTexto,"ERROU!!!");
+                    //somaScore -= 20;
+                }
+            }
         }else if (colisao(carro,tunel2)){
-            strcpy(ultChTexto,"TUNEL 2");
             passTunel = 2;
-            ultimaChance.ativo = true;
-
+            if(strcmp(txtTunel_2[proxLinha]," ")!=0){
+                ultimaChance.ativo = true;
+                if(strcmp(tunel2.texto,txtTunel_1[proxLinha])==0){
+                    strcpy(ultChTexto,"ACERTOU!!!");
+                    //somaScore += 50;
+                }else{
+                    strcpy(ultChTexto,"ERROU!!!");
+                    //somaScore -= 20;
+                }
+            }
         }else if (colisao(carro,tunel3)){
-            strcpy(ultChTexto,"TUNEL 3");
             passTunel = 3;
-            ultimaChance.ativo = true;
+            if(strcmp(txtTunel_3[proxLinha]," ")!=0){
+                ultimaChance.ativo = true;
+                if(strcmp(tunel3.texto,txtTunel_1[proxLinha])==0){
+                    strcpy(ultChTexto,"ACERTOU!!!");
+                    //somaScore += 50;
+                }else{
+                    strcpy(ultChTexto,"ERROU!!!");
+                    //somaScore -= 20;
+                }
+            }
         }else{
             passTunel = 0;
         }
 
         //------------------------------------------------------------CONTROLA TEMPO DE JOGO
-        tempJogo++;
+        //Tempo de duracao do jogo
         if(tempJogo>TEMPO_JOGO_SEGUNDOS*FPS){
             tempTelaFimTempo = 0;
             telaAtual=TELA_FIM_TEMPO;
-        }
+        }else tempJogo++;
+
+        //Tempo de pisca-Seta(Algoritmo)
+        if(seta.temp>FPS/3){
+            seta.temp=0;
+            if(seta.ativo)seta.ativo=false;
+            else seta.ativo=true;
+        }else seta.temp++;
 
         //------------------------------------------------------------LIMITE SUP E INF
         //----------LIMITES DA TELA
@@ -1131,12 +1234,11 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         if (carro.posY >= TELA_ALTURA-carro.altura/2){
             carro.posY =  TELA_ALTURA-carro.altura/2;
         }
-
         if (carro.posX <= carro.largura/2){
             carro.posX = carro.largura/2;
         }
-        if (carro.posX >= TELA_LARGURA-carro.largura/2){
-            carro.posX =  TELA_LARGURA-carro.largura/2;
+        if (carro.posX >= TELA_LARGURA-Quadro.largura-carro.largura/2){
+            carro.posX =  TELA_LARGURA-Quadro.largura-carro.largura/2;
         }
 
         //----------LIMITES DO TUNEL
@@ -1247,6 +1349,8 @@ void inicializaObjetos(){
     Quadro.x1Colisao = -30;
     Quadro.y1Colisao = -10;
     Quadro.vel = 4;
+
+    seta.ativo = true;
 
     btPlay.ativo=true;
     btPlay.posX = 496;
