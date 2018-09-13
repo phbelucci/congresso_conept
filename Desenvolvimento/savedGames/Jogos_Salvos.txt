@@ -3,7 +3,11 @@ Posicao:	Pontuacao:	Nome:
 
 2 º		1560		GFFG
 
+<<<<<<< HEAD
 3 º		0		436555
+=======
+3 º		0		32423878
+>>>>>>> f5ba943371d7440be27cdc6583f928f45d8400ae
 
 4 º		0		[VAZIO]
 
