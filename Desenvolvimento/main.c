@@ -33,6 +33,8 @@
 #define     TUNEL_1                 0
 #define     TUNEL_2                 1
 #define     TUNEL_3                 2
+#define     VELOCIDADE_MINIMA       5
+#define     VELOCIDADE_MAXIMA       10
 
 //----------------------------------------------------DECLARAÇÃO DE VARIÁVEIS GLOBAIS
 // Ponteiro representando a janela principal
@@ -125,15 +127,17 @@ float velDesloc = 8;
 int qtdeTestes = 0;
 
 //Variaveis para controle do teclado
-bool cima = 0;
-bool baixo = 0;
-bool esquerda = 0;
-bool direita = 0;
+bool cima = false;
+bool baixo = false;
+bool esquerda = false;
+bool direita = false;
+bool acelera = false;
+bool freia = false;
 int indexNome = -1;
 int caracterPendente = 0;  // 0 - Não há letra a ser lida   e 1 - Letra  aguardando ser lida
 char caracter='\0';    // Armazena o caractere digitado
-bool teclaEnter = 0;
-bool teclaApagar = 0;
+bool teclaEnter = false;
+bool teclaApagar = false;
 
 
 //Variaveis para controle do mouse
@@ -361,6 +365,12 @@ int main(void){
                 case ALLEGRO_KEY_RIGHT:
                 direita = 1;
                 break;
+                case ALLEGRO_KEY_S:
+                acelera = 1;
+                break;
+                case ALLEGRO_KEY_A:
+                freia = 1;
+                break;
                 //esc. sair=1 faz com que o programa saia do loop principal
                 case ALLEGRO_KEY_ESCAPE:
                 switch(telaAtual){
@@ -407,10 +417,15 @@ int main(void){
                 case ALLEGRO_KEY_LEFT:
                 esquerda = 0;
                 break;
-
                 //seta para direita.
                 case ALLEGRO_KEY_RIGHT:
                 direita = 0;
+                break;
+                case ALLEGRO_KEY_S:
+                acelera = 0;
+                break;
+                case ALLEGRO_KEY_A:
+                freia = 0;
                 break;
                 case ALLEGRO_KEY_BACKSPACE:
                 teclaApagar = 0;
@@ -597,7 +612,7 @@ void resetJogo(){
 
     carro.posX = 150;
     carro.posY=500;
-    carro.vel= 7;
+    carro.vel= 5;
     velDesloc = rand()%5 + 6;
     carro.ang= 2*ALLEGRO_PI;
     estadoCarro = 0;
@@ -1148,9 +1163,9 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         if((tunel1.posX<tunel1.largura*-3)&&(tunel2.posX<tunel2.largura*-3)&&(tunel3.posX<tunel3.largura*-3)){
             //Reposicionamento dos Tuneis
             //(rand() % 4)+ 1;
-            tunel1.posX = (rand() % (TELA_LARGURA + tunel1.largura*3)) + (TELA_LARGURA + tunel1.largura);
-            tunel2.posX = (rand() % (TELA_LARGURA + tunel2.largura*3)) + (TELA_LARGURA + tunel2.largura);
-            tunel3.posX = (rand() % (TELA_LARGURA + tunel3.largura*3)) + (TELA_LARGURA + tunel3.largura);
+            tunel1.posX = (rand() % (TELA_LARGURA + tunel1.largura*2)) + (TELA_LARGURA + tunel1.largura);
+            tunel2.posX = (rand() % (TELA_LARGURA + tunel2.largura*2)) + (TELA_LARGURA + tunel2.largura);
+            tunel3.posX = (rand() % (TELA_LARGURA + tunel3.largura*2)) + (TELA_LARGURA + tunel3.largura);
 
             //Pontuacao:
             if(strcmp(ultChTexto,"ACERTOU!!!")==0){
@@ -1262,6 +1277,7 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         }
 
         //------------------------------------------------------------CONTROLES DO TECLADO
+        //Movimentacao lateral
         if(cima){
             carro.posY-= velDesloc;
             //carro.ang=(6.05865);
@@ -1271,11 +1287,22 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         }else{
             carro.ang= 2*ALLEGRO_PI;
         }
+        //Direcao
         if(esquerda){
             carro.posX-= velDesloc;
-        }
-        if(direita){
+        }else if(direita){
             carro.posX+= velDesloc;
+        }
+        //Aceleracao
+        if(acelera){
+            if(carro.vel<VELOCIDADE_MAXIMA) carro.vel = VELOCIDADE_MAXIMA;
+            else carro.vel+=carro.vel/150;
+        }else if(freia){
+            if(carro.vel<VELOCIDADE_MINIMA) carro.vel = VELOCIDADE_MINIMA;
+            else carro.vel-=carro.vel/50;
+        }else{
+            if(carro.vel<VELOCIDADE_MINIMA) carro.vel = VELOCIDADE_MINIMA;
+            else carro.vel-=carro.vel/180;
         }
 
     }
