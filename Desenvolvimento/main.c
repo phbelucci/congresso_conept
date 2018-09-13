@@ -773,9 +773,9 @@ void loadBitmap(){
     textPlayer.objetoFont =              al_load_font("fonte/alarm_clock/alarm_clock.ttf", 90, ALLEGRO_TTF_NO_KERNING);
     textScoreJogo.objetoFont =           al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
     ultimaChance.objetoFont =            al_load_font("fonte/alarm_clock/alarm_clock.ttf", 80, ALLEGRO_TTF_NO_KERNING);
-    tunel1.objetoFont =                  al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
-    tunel2.objetoFont =                  al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
-    tunel3.objetoFont =                  al_load_font("fonte/cambriab.ttf", 100, ALLEGRO_TTF_NO_KERNING);
+    tunel1.objetoFont =                  al_load_font("fonte/cambriab.ttf", 70, ALLEGRO_TTF_NO_KERNING);
+    tunel2.objetoFont =                  al_load_font("fonte/cambriab.ttf", 70, ALLEGRO_TTF_NO_KERNING);
+    tunel3.objetoFont =                  al_load_font("fonte/cambriab.ttf", 70, ALLEGRO_TTF_NO_KERNING);
 
 }
 void telaMenu(){//----------------------------------------------------FUNCAO RESPONSALVEL PELO MENU
@@ -1096,15 +1096,15 @@ void drawTelaJogo (){
     if(carro.ativo)al_draw_rotated_bitmap(carro.objetoBitmap, carro.largura/2, carro.altura/2, carro.posX, carro.posY,carro.ang,0);
     if(tunel1.ativo){
         al_draw_bitmap(tunel1.objetoBitmap, tunel1.posX, tunel1.posY, 0);
-        al_draw_text(tunel1.objetoFont, al_map_rgb(255, 255, 0), tunel1.posX+100, tunel1.posY+100, ALLEGRO_ALIGN_LEFT, tunel1.texto);
+        al_draw_text(tunel1.objetoFont, al_map_rgb(255, 255, 0), tunel1.posX+120, tunel1.posY+100, ALLEGRO_ALIGN_LEFT, tunel1.texto);
     }
     if(tunel2.ativo){
         al_draw_bitmap(tunel2.objetoBitmap, tunel2.posX, tunel2.posY, 0);
-        al_draw_text(tunel2.objetoFont, al_map_rgb(255, 255, 0), tunel2.posX+100, tunel2.posY+100, ALLEGRO_ALIGN_LEFT, tunel2.texto);
+        al_draw_text(tunel2.objetoFont, al_map_rgb(255, 255, 0), tunel2.posX+120, tunel2.posY+100, ALLEGRO_ALIGN_LEFT, tunel2.texto);
     }
     if(tunel3.ativo){
         al_draw_bitmap(tunel3.objetoBitmap, tunel3.posX, tunel3.posY, 0);
-        al_draw_text(tunel3.objetoFont, al_map_rgb(255, 255, 0), tunel3.posX+100, tunel3.posY+100, ALLEGRO_ALIGN_LEFT, tunel3.texto);
+        al_draw_text(tunel3.objetoFont, al_map_rgb(255, 255, 0), tunel3.posX+120, tunel3.posY+100, ALLEGRO_ALIGN_LEFT, tunel3.texto);
     }
     if(Quadro.ativo)al_draw_bitmap(Quadro.objetoBitmap, Quadro.posX, Quadro.posY, 0);
     if(seta.ativo)al_draw_bitmap(seta.objetoBitmap, seta.posX-10, seta.posY-10, 0);
@@ -1312,7 +1312,7 @@ void inicializaObjetos(){
     carro.x1Colisao = -90;
     carro.y1Colisao = -100;
     carro.ang= 2*ALLEGRO_PI;
-    carro.vel= 10;
+    carro.vel= 20;
 
     tunel1.ativo=true;
     tunel1.posX = backGround.posX + TELA_LARGURA;
@@ -1353,12 +1353,12 @@ void inicializaObjetos(){
     seta.ativo = true;
 
     btPlay.ativo=true;
-    btPlay.posX = 496;
-    btPlay.posY = 560;
+    btPlay.posX = 468;
+    btPlay.posY = 520;
 
     btExit.ativo=true;
-    btExit.posX = 1032;
-    btExit.posY = 560;
+    btExit.posX = 1000;
+    btExit.posY = 520;
 
     btPlayAgain.ativo=true;
     btPlayAgain.posX = 807;
