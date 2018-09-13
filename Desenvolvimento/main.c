@@ -1,4 +1,4 @@
-Ôªø#include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -34,14 +34,14 @@
 #define     TUNEL_2                 1
 #define     TUNEL_3                 2
 
-//----------------------------------------------------DECLARA√á√ÉO DE VARI√ÅVEIS GLOBAIS
+//----------------------------------------------------DECLARA«√O DE VARI¡VEIS GLOBAIS
 // Ponteiro representando a janela principal
 ALLEGRO_DISPLAY *janela = NULL;
 //Poteiro que recebe  o TIMER do programa
 ALLEGRO_TIMER *timer = NULL;
-//Matriz para receber as carros e seus respectivos estados de destrui√ß√£o
+//Matriz para receber as carros e seus respectivos estados de destruiÁ„o
 ALLEGRO_BITMAP *carroImagem[3][3];
-//Estrutura que representa os objetos do jogo(Nave, tunel1√°culos, bot√µes e etc.)
+//Estrutura que representa os objetos do jogo(Nave, tunel1·culos, botıes e etc.)
 typedef struct{
     int posX;
     int posY;
@@ -62,7 +62,7 @@ typedef struct{
     ALLEGRO_BITMAP *objetoBitmap;
     ALLEGRO_FONT *objetoFont;
 }Objeto;
-// Declara√ß√£o dos objetos do jogo
+// DeclaraÁ„o dos objetos do jogo
 Objeto backGround;
 Objeto backGroundCidade;
 Objeto backGroundMenu;
@@ -96,6 +96,8 @@ Objeto seta;
 
 
 //Declara e inicializa Variaveis de controle do jogo
+int numTestes = 0;
+int numAcertos = 0;
 int passTunel= 0; //Armazena numero do tunel que o carro passou
 int proxLinha = 0;
 char txtTunel_1[QTDE_LINHAS_ALGORITMO][TAMANHO_LINHA_ALGORTIMO];
@@ -106,7 +108,6 @@ char ultChTexto[10];
 bool sair = 0;
 bool pause = 0;
 bool jogoSalvo = 0;
-int score = 0;
 int somaScore = 0;
 int tempJogo=0;
 int telaAtual=TELA_MENU;
@@ -114,7 +115,6 @@ char nomePlayer[TAMANHO_NOME_PLAYER]={"No DE R.A."};
 int inicializacao = 4000;
 int piscaCarro=0;
 int tempTelaFimTempo = 0;
-int progressao = 1;
 int tipoCarro = 0;
 int estadoCarro = 0;
 int carroClick = 0;
@@ -130,7 +130,7 @@ bool baixo = 0;
 bool esquerda = 0;
 bool direita = 0;
 int indexNome = -1;
-int caracterPendente = 0;  // 0 - N√£o h√° letra a ser lida   e 1 - Letra  aguardando ser lida
+int caracterPendente = 0;  // 0 - N„o h· letra a ser lida   e 1 - Letra  aguardando ser lida
 char caracter='\0';    // Armazena o caractere digitado
 bool teclaEnter = 0;
 bool teclaApagar = 0;
@@ -143,8 +143,8 @@ int posYMouse = 4000;
 int posYMouseClick = 4000;
 
 /*----------------------------------------------------
-RECEBE UMA STRING LINHA E IDENTIFICA SEU ESPA√áO EM
-BRANCO E AS 3 ALTERNATIVAS POSS√çVEIS, DEVOLVE LINHA
+RECEBE UMA STRING LINHA E IDENTIFICA SEU ESPA«O EM
+BRANCO E AS 3 ALTERNATIVAS POSSÕVEIS, DEVOLVE LINHA
 FORMATADA: "_ _ _ _"
 ----------------------------------------------------*/
 bool identificaOpcao(char *txt,char *op1,char *op2,char *op3);
@@ -154,25 +154,25 @@ linha do algoritmo o programa esta.
 ----------------------------------------------------*/
 void inverteOrdemTxt(int index);
 /*----------------------------------------------------
-ATRIBUI OS VALORES INICIAIS AS VARI√ÅVEIS RELACIONADAS
+ATRIBUI OS VALORES INICIAIS AS VARI¡VEIS RELACIONADAS
 A TELA JOGO ANTES DE INICIAR UMA NOVA PARTIDA
 ----------------------------------------------------*/
 void resetJogo();
 /*----------------------------------------------------
 VERIFICA SE HOUVE COLISAO ENTRE OS OBJETOS PASSADOS
-POR PAR√ÇMETRO E RETORNA VERDADEIRO CASO HOUVE, E FALSO
-CASO N√ÉO HOUVE.
+POR PAR¬METRO E RETORNA VERDADEIRO CASO HOUVE, E FALSO
+CASO N√O HOUVE.
 ----------------------------------------------------*/
 bool colisao(Objeto obj1, Objeto obj2);
 /*----------------------------------------------------
-VERIFICA SE O CURSOR DO MOUSE EST√Å POSICIONADO SOBRE
-O BOT√ÉO PASSADO POR PAR√ÇMETRO E RETORNA 1 CASO ESTEJA
-E 0 CASO N√ÉO ESTEJA
+VERIFICA SE O CURSOR DO MOUSE EST¡ POSICIONADO SOBRE
+O BOT√O PASSADO POR PAR¬METRO E RETORNA 1 CASO ESTEJA
+E 0 CASO N√O ESTEJA
 ----------------------------------------------------*/
 int mousePosicao(ALLEGRO_BITMAP *botao, int posXBotao, int posYBotao);
 /*----------------------------------------------------
-VERIFICA SE OCORREU UM CLICK NO BOT√ÉO PASSADO POR
-PAR√ÇMETRO
+VERIFICA SE OCORREU UM CLICK NO BOT√O PASSADO POR
+PAR¬METRO
 ----------------------------------------------------*/
 int mouseClick(ALLEGRO_BITMAP *botao, int posXBotao, int posYBotao);
 /*----------------------------------------------------
@@ -181,42 +181,42 @@ PONTEIROS
 ----------------------------------------------------*/
 void loadBitmap();
 /*----------------------------------------------------
-EXIBE A TELA INICIAL COM AS OP√á√ïES DE JOGAR E SAIR
+EXIBE A TELA INICIAL COM AS OP«’ES DE JOGAR E SAIR
 ----------------------------------------------------*/
 void telaMenu();
 /*----------------------------------------------------
-EXIBE A TELA PARA ESCOLHER 1 ENTRE 3 OP√á√ïES DE NAVE,
-1 ENTRE DUAS OP√á√ïES DE CEN√ÅRIO E INFORMAR O NOME(NICK)
+EXIBE A TELA PARA ESCOLHER 1 ENTRE 3 OP«’ES DE NAVE,
+1 ENTRE DUAS OP«’ES DE CEN¡RIO E INFORMAR O NOME(NICK)
 DO PLAYER
 ----------------------------------------------------*/
 void telaEscolha();
 /*----------------------------------------------------
-EXIBE UMA TELA DE PAUSE COM AS OP√á√ïES DE CONTINUAR
+EXIBE UMA TELA DE PAUSE COM AS OP«’ES DE CONTINUAR
 JOGANDO OU SAIR DO JOGO
 ----------------------------------------------------*/
 void telaPause();
 /*----------------------------------------------------
 ABRE ARQUIVO E CARREGA OS DADOS DO MESMO NOS VETORES
-PASSADOS POR PAR√ÇMETRO.
-CASO N√ÉO HAJA ARQUIVO, CRIA UM NOVO.
+PASSADOS POR PAR¬METRO.
+CASO N√O HAJA ARQUIVO, CRIA UM NOVO.
 EM SEGUIDA FECHA O ARQUIVO.
 ----------------------------------------------------*/
 int abreArquivoDisco(char rankingPlayersArq[][50], int numJogadores, int scoreArq[]);
 /*----------------------------------------------------
 ABRE O ARQUIVO EXISTENTE E SALVA OS DADOS DO JOGO
-PASSADOS POR PAR√ÇMETRO NO MESMO. EM SEGUIDA FECHA O
+PASSADOS POR PAR¬METRO NO MESMO. EM SEGUIDA FECHA O
 ARQUIVO.
 ----------------------------------------------------*/
 int SalvaArquivoDisco(char rankingPlayersArq[][50], int numJogadores, int scoreArq[]);
 /*----------------------------------------------------
-RECEBE OS VETORES DE PONTUA√á√ÉO E NOMES DOS JOGADORES E
-ORDENA AMBOS DA MAIOR PONTUA√á√ÉO PARA A MENOR UTILIZANDO
-O ALGORITMO DE ORDENA√á√ÉO INSERTION SORT.
+RECEBE OS VETORES DE PONTUA«√O E NOMES DOS JOGADORES E
+ORDENA AMBOS DA MAIOR PONTUA«√O PARA A MENOR UTILIZANDO
+O ALGORITMO DE ORDENA«√O INSERTION SORT.
 ----------------------------------------------------*/
 void ordenaRanking(int *ranking[], char nomeJogadores[][50]);
 /*----------------------------------------------------
 CARREGA O RANKING A PARTIR DO ARQUIVO, EXIBE O RANKING
-ORDENADO E AS OP√á√ïES DE JOGAR NOVAMENTE OU SAIR
+ORDENADO E AS OP«’ES DE JOGAR NOVAMENTE OU SAIR
 ----------------------------------------------------*/
 void telaRanking();
 /*----------------------------------------------------
@@ -224,7 +224,7 @@ DESENHA AS IMAGENS CORRESPONDENTES A TELA JOGO
 ----------------------------------------------------*/
 void drawTelaJogo ();
 /*----------------------------------------------------
-EXECUTA A MEC√ÇNICA E A L√ìGICA DO JOGO, EXIBINDO OS OBJETOS
+EXECUTA A MEC¬NICA E A L”GICA DO JOGO, EXIBINDO OS OBJETOS
 EM MOVIMENTO NA TELA.
 ----------------------------------------------------*/
 void telaJogo();
@@ -234,14 +234,14 @@ RANKING.
 ----------------------------------------------------*/
 void telaFimTempo();
 /*----------------------------------------------------
-ATRIBUI OS VALORES INICIAIS AS VARI√ÅVEIS GLOBAIS
+ATRIBUI OS VALORES INICIAIS AS VARI¡VEIS GLOBAIS
 RELACIONADAS A TODAS AS TELAS.
 ----------------------------------------------------*/
 void inicializaObjetos();
 /*----------------------------------------------------
-FUN√á√ÉO PRINCIPAL: INICIALIZA OS PAR√ÇMETRO DA ALLEGRO
-NECESS√ÅRIOS PARA O FUNCIONAMENTO DO JOGO.
-CALCULA RESOLU√á√ÉO DO JOGO EM FUN√á√ÉO DA RESOLU√á√ÉO DA TELA
+FUN«√O PRINCIPAL: INICIALIZA OS PAR¬METRO DA ALLEGRO
+NECESS¡RIOS PARA O FUNCIONAMENTO DO JOGO.
+CALCULA RESOLU«√O DO JOGO EM FUN«√O DA RESOLU«√O DA TELA
 DO COMPUTADOR UTILIZADO.
 ----------------------------------------------------*/
 int main(void){
@@ -251,7 +251,7 @@ int main(void){
     //Variavel ponteiro para fila de enventos
     ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
     //------------------------------------- inicializacao JANELAS e IMAGENS ---------------------------------
-    // Inicializa o add-on para utiliza√ß√£o de imagens
+    // Inicializa o add-on para utilizaÁ„o de imagens
     al_init_image_addon();
     al_init_font_addon();
     al_init_ttf_addon();
@@ -282,7 +282,7 @@ int main(void){
 	al_use_transform(&transformar);
 
     //------------------------------------- inicializacao EVENTOS---------------------------------
-    //Inicializa vari√°vel timer com FPS definido
+    //Inicializa vari·vel timer com FPS definido
     timer = al_create_timer(1.0 / FPS);
 
     //inicializa addon do teclado
@@ -291,10 +291,10 @@ int main(void){
     //inicializa addon do mouse
     al_install_mouse();
 
-    // Atribui o cursor padr√£o do sistema para ser usado
+    // Atribui o cursor padr„o do sistema para ser usado
     al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT);
 
-    //Inicializa vari√°vel fila de eventos
+    //Inicializa vari·vel fila de eventos
     fila_eventos = al_create_event_queue();
 
     //registra  timer, teclado e mouse na fila de eventos
@@ -432,7 +432,7 @@ int main(void){
         }
 
         //****************************************************************************
-        // Se o evento foi de movimenta√ß√£o do mouse
+        // Se o evento foi de movimentaÁ„o do mouse
         //****************************************************************************
         if (evento.type == ALLEGRO_EVENT_MOUSE_AXES){
             posXMouse = evento.mouse.x/red_x;
@@ -581,11 +581,11 @@ void resetJogo(){
     }else if (cenarioClick ==2){
         backGround.objetoBitmap = al_load_bitmap("img/back/1920/cenario/backgroundCidade.jpg");
     }
-
+    numAcertos = 0;
+    numTestes = 0;
     passTunel= 0;
     proxLinha = 0;
     qtdeTestes = 0;
-    score = 0;
     somaScore = 0;
     tempJogo=0;
     inicializacao = 0;
@@ -675,6 +675,7 @@ void resetJogo(){
     for(i=0;i<QTDE_LINHAS_ALGORITMO;i++){
         if(identificaOpcao(scriptTXT[i],txtTunel_1[i],txtTunel_2[i],txtTunel_3[i])){
             printf("\nLinha %i: Teste identificado", i);
+            numTestes++;
             printf("\n\t%s  ||  %s  ||  %s",txtTunel_1[i],txtTunel_2[i],txtTunel_3[i]);
         }else{
             printf("\nLinha %i: Teste nao identificado", i);
@@ -938,7 +939,7 @@ int abreArquivoDisco(char rankingPlayersArq[][50], int numJogadores, int scoreAr
         result = fprintf(arq,"Posicao:\tPontuacao:\tNome:\n");
         if(result < 0)printf("Erro na escrita\n");
         for(i=0;i<NUM_JOGADORES;i++){
-            result = fprintf(arq,"%i ¬∫\t\t",i+1);
+            result = fprintf(arq,"%i ∫\t\t",i+1);
             result = fprintf(arq,"%i\t\t",scoreArq[i]);
             result = fprintf(arq,"%s\n",rankingPlayersArq[i]);
             if(result < 0)printf("Erro na escrita\n");
@@ -954,10 +955,10 @@ int abreArquivoDisco(char rankingPlayersArq[][50], int numJogadores, int scoreAr
     fgets(texto,200,arq);//Le cabecaolho e descarta
 
     for(i=0;i<NUM_JOGADORES;i++){
-        fscanf(arq," %s", texto); //L√™ a posicao e descarta
-        fscanf(arq," %s", texto); //L√™ o "¬∫" e descarta
-        fscanf(arq," %i", &scoreArq[i]); //L√™ a pontuacao e armazena
-        fgets(&rankingPlayersArq[i],50,arq);  //L√™ o Nome do Player e armazena
+        fscanf(arq," %s", texto); //LÍ a posicao e descarta
+        fscanf(arq," %s", texto); //LÍ o "∫" e descarta
+        fscanf(arq," %i", &scoreArq[i]); //LÍ a pontuacao e armazena
+        fgets(&rankingPlayersArq[i],50,arq);  //LÍ o Nome do Player e armazena
     }
 
     fclose(arq);
@@ -977,7 +978,7 @@ int SalvaArquivoDisco(char rankingPlayersArq[][50], int numJogadores, int scoreA
     result = fprintf(arq,"Posicao:\tPontuacao:\tNome:\n");
     if(result < 0)printf("Erro na escrita\n");
     for(i=0;i<NUM_JOGADORES;i++){
-        result = fprintf(arq,"%i ¬∫\t\t",i+1);
+        result = fprintf(arq,"%i ∫\t\t",i+1);
         result = fprintf(arq,"%i",scoreArq[i]);
         result = fprintf(arq,"%s\n",rankingPlayersArq[i]);
     }
@@ -1023,25 +1024,17 @@ void telaRanking(){//-------------------------------------------------FUNCAO RES
     if(!jogoSalvo){
         // ABRE OU CRIA UM AQUIVO E COPIA VALORES SALVOS PARA OS ARRAYS DE NOME E PONTUACAO
         jogoSalvo = abreArquivoDisco(rankingPlayers,NUM_JOGADORES,rankingScore);
-        // INSERE OS DADOS DO √öLTIMO JOGO REALIZADO NO PRIMEIRO ESPA√áO DISPONIVEL DO ARRAY
+        // INSERE OS DADOS DO ⁄LTIMO JOGO REALIZADO NO PRIMEIRO ESPA«O DISPONIVEL DO ARRAY
         for(i=0;i<NUM_JOGADORES;i++){
-            if(rankingScore[i]==0){
+            if(rankingScore[i]<somaScore){
                 strcpy(&rankingPlayers[i],"\t\t");
                 strcat(&rankingPlayers[i],&nomePlayer);
                 strcat(&rankingPlayers[i],"\n");
-                rankingScore[i] = somaScore*progressao;
+                rankingScore[i] = somaScore;
                 break;
             }
         }
-        //SE N√ÉO H√Å ESPA√áO DISPON√çVEL NOS ARRAYS, INSERE DADOS DO √öLTIMO JOGO NA √öLTIMA LINHA DOS ARRAYS
-        if(i>=NUM_JOGADORES){
-            strcpy(&rankingPlayers[NUM_JOGADORES-1],"\t\t");
-            strcat(&rankingPlayers[NUM_JOGADORES-1],&nomePlayer);
-            strcat(&rankingPlayers[NUM_JOGADORES-1],"\n");
-            rankingScore[NUM_JOGADORES-1] = somaScore*progressao;
-        }
-
-        //ORDENA OS ARRAYS DA MAIOR PARA A MENOR PONTUA√á√ÉO (DE CIMA PARA BAIXO RESPECTIVAMENTE)
+        //ORDENA OS ARRAYS DA MAIOR PARA A MENOR PONTUA«√O (DE CIMA PARA BAIXO RESPECTIVAMENTE)
         ordenaRanking(rankingScore, rankingPlayers);
 
         //SALVA ARRAYS ATUALIZADOS NO ARQUIVO
@@ -1051,7 +1044,7 @@ void telaRanking(){//-------------------------------------------------FUNCAO RES
     al_draw_bitmap(backGroundRanking.objetoBitmap, 0, 0, 0);
 
     //SCORE FINAL
-    al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(255, 255, 0), 270, 65, ALLEGRO_ALIGN_LEFT, "%i",somaScore*progressao);
+    al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(255, 255, 0), 270, 65, ALLEGRO_ALIGN_LEFT, "%i",somaScore);
     //RANKING PLAYERS
     int posYTextRanking = 180;
     for(i=0;i<NUM_JOGADORES;i++){
@@ -1109,9 +1102,9 @@ void drawTelaJogo (){
     if(Quadro.ativo)al_draw_bitmap(Quadro.objetoBitmap, Quadro.posX, Quadro.posY, 0);
     if(seta.ativo)al_draw_bitmap(seta.objetoBitmap, seta.posX-10, seta.posY-10, 0);
 
-    if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE: %i",somaScore*progressao);
+    if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE(%%): %i", somaScore);
     if(textTime.ativo)al_draw_textf(textTime.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 20 , 10, ALLEGRO_ALIGN_LEFT, "TIME: %i",TEMPO_JOGO_SEGUNDOS - (tempJogo/FPS));
-    if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), ultimaChance.posX-350, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
+    if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), ultimaChance.posX-250, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
     for(i=0;i<QTDE_LINHAS_ALGORITMO;i++){
     al_draw_text(Quadro.objetoFont, al_map_rgb(255, 255, 0), (float)(TELA_LARGURA-Quadro.largura+30), posYTextQuadro, ALLEGRO_ALIGN_LEFT, scriptTXT[i]);
     posYTextQuadro += 60;
@@ -1143,7 +1136,7 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
 
     }else{//----------------------------------------------------------ROTINA DO JOGO ATIVO
 
-        //------------------------------------------------------------TRATAMENTO DAS POSI√á√ïES E VELOCIDADES(TODOS OS OBJETOS)
+        //------------------------------------------------------------TRATAMENTO DAS POSI«’ES E VELOCIDADES(TODOS OS OBJETOS)
         //Posicionamento do background (VELOCIDADE DO CARRO)
         backGround.posX -= carro.vel;
 
@@ -1152,12 +1145,24 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         }
 
         //Posicionamento dos tuneis 1, 2 e 3
-        if(tunel1.posX<-tunel1.largura*3){
-            tunel1.posX = TELA_LARGURA + tunel1.largura*2;
-            tunel2.posX = tunel1.posX;
-            tunel3.posX = tunel2.posX;
+        if((tunel1.posX<tunel1.largura*-3)&&(tunel2.posX<tunel2.largura*-3)&&(tunel3.posX<tunel3.largura*-3)){
+            //Reposicionamento dos Tuneis
+            //(rand() % 4)+ 1;
+            tunel1.posX = (rand() % (TELA_LARGURA + tunel1.largura*3)) + (TELA_LARGURA + tunel1.largura);
+            tunel2.posX = (rand() % (TELA_LARGURA + tunel2.largura*3)) + (TELA_LARGURA + tunel2.largura);
+            tunel3.posX = (rand() % (TELA_LARGURA + tunel3.largura*3)) + (TELA_LARGURA + tunel3.largura);
+
+            //Pontuacao:
+            if(strcmp(ultChTexto,"ACERTOU!!!")==0){
+                strcpy(ultChTexto," ");
+                numAcertos++;
+                somaScore = (int)((numAcertos*100/numTestes));
+            }
+
+            //DetecÁ„o de fim de algoritmo:
             if(proxLinha>QTDE_LINHAS_ALGORITMO){
                 telaAtual = TELA_RANKING;
+            //AvanÁo de Marcador de linha
             }else {
                 proxLinha++;
                 seta.posY += 60;
@@ -1165,23 +1170,21 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
             }
         }else{
             tunel1.posX -= carro.vel;
-            tunel2.posX = tunel1.posX;
-            tunel3.posX = tunel2.posX;
+            tunel2.posX -= carro.vel;
+            tunel3.posX -= carro.vel;
         }
 
 
 
-        //------------------------------------------------------------TRATAMENTO DAS COLIS√ïES
+        //------------------------------------------------------------TRATAMENTO DAS COLIS’ES
         if (colisao(carro,tunel1)){
             passTunel = 1;
             if(strcmp(txtTunel_1[proxLinha]," ")!=0){
                 ultimaChance.ativo = true;
                 if(strcmp(tunel1.texto,txtTunel_1[proxLinha])==0){
                     strcpy(ultChTexto,"ACERTOU!!!");
-                    //somaScore += 50;
                 }else{
                     strcpy(ultChTexto,"ERROU!!!");
-                    //somaScore -= 20;
                 }
             }
         }else if (colisao(carro,tunel2)){
@@ -1190,10 +1193,8 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
                 ultimaChance.ativo = true;
                 if(strcmp(tunel2.texto,txtTunel_1[proxLinha])==0){
                     strcpy(ultChTexto,"ACERTOU!!!");
-                    //somaScore += 50;
                 }else{
                     strcpy(ultChTexto,"ERROU!!!");
-                    //somaScore -= 20;
                 }
             }
         }else if (colisao(carro,tunel3)){
@@ -1202,10 +1203,8 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
                 ultimaChance.ativo = true;
                 if(strcmp(tunel3.texto,txtTunel_1[proxLinha])==0){
                     strcpy(ultChTexto,"ACERTOU!!!");
-                    //somaScore += 50;
                 }else{
                     strcpy(ultChTexto,"ERROU!!!");
-                    //somaScore -= 20;
                 }
             }
         }else{

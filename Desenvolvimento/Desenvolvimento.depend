@@ -1,5 +1,6 @@
 # depslib dependency file v1.0
-1536710250 source:c:\users\silvio\documents\google drive\carreira\cursos\software\curso_git\congresso_conept\desenvolvimento\main.c
+1536857186 source:c:\users\silvio\documents\google drive\carreira\cursos\software\curso_git\congresso_conept\desenvolvimento\main.c
+	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<ctype.h>
