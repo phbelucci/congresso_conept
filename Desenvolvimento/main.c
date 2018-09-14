@@ -626,25 +626,22 @@ void resetJogo(){
     tunel1.largura = al_get_bitmap_width(tunel1.objetoBitmap);
     tunel1.altura = al_get_bitmap_height(tunel1.objetoBitmap);
     strcpy(txtTunel_1," ");
-    //
-    tunel1.posX = TELA_LARGURA+2*tunel1.largura;
+    //(rand() % 4)+ 1;
+    tunel1.posX = (rand() % tunel1.largura) + TELA_LARGURA + tunel1.largura*2;
 
     //tunel2.posX = backGround.posX + TELA_LARGURA;
     tunel2.posY = 358;
     tunel2.largura = al_get_bitmap_width(tunel2.objetoBitmap);
     tunel2.altura = al_get_bitmap_height(tunel2.objetoBitmap);
     strcpy(txtTunel_2," ");
-    //
-    tunel2.posX = TELA_LARGURA+2*tunel1.largura;
+    tunel2.posX = (rand() % tunel2.largura) + TELA_LARGURA + tunel2.largura*2;
 
     //tunel3.posX = backGround.posX + TELA_LARGURA;
     tunel3.posY = 718;
     tunel3.largura = al_get_bitmap_width(tunel3.objetoBitmap);
     tunel3.altura = al_get_bitmap_height(tunel3.objetoBitmap);
     strcpy(txtTunel_3," ");
-    //
-    tunel3.posX = TELA_LARGURA+2*tunel1.largura;
-
+    tunel3.posX = (rand() % tunel3.largura) + TELA_LARGURA + tunel3.largura*2;
 
     Quadro.largura = al_get_bitmap_width(Quadro.objetoBitmap);
     Quadro.altura = al_get_bitmap_height(Quadro.objetoBitmap);
@@ -1117,8 +1114,8 @@ void drawTelaJogo (){
     if(Quadro.ativo)al_draw_bitmap(Quadro.objetoBitmap, Quadro.posX, Quadro.posY, 0);
     if(seta.ativo)al_draw_bitmap(seta.objetoBitmap, seta.posX-10, seta.posY-10, 0);
 
-    if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 500, 10, ALLEGRO_ALIGN_LEFT, "SCORE(%%): %i", somaScore);
-    if(textTime.ativo)al_draw_textf(textTime.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 20 , 10, ALLEGRO_ALIGN_LEFT, "TIME: %i",TEMPO_JOGO_SEGUNDOS - (tempJogo/FPS));
+    if(textScoreJogo.ativo)al_draw_textf(textScoreJogo.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 20, 10, ALLEGRO_ALIGN_LEFT, "SCORE(%%): %i", somaScore);
+    //if(textTime.ativo)al_draw_textf(textTime.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), 20 , 10, ALLEGRO_ALIGN_LEFT, "TIME: %i",TEMPO_JOGO_SEGUNDOS - (tempJogo/FPS));
     if(ultimaChance.ativo)al_draw_textf(ultimaChance.objetoFont, al_map_rgb(textTime.textColour_R, textTime.textColour_G, textTime.textColour_B), ultimaChance.posX-250, ultimaChance.posY, ALLEGRO_ALIGN_LEFT, ultChTexto);
     for(i=0;i<QTDE_LINHAS_ALGORITMO;i++){
     al_draw_text(Quadro.objetoFont, al_map_rgb(255, 255, 0), (float)(TELA_LARGURA-Quadro.largura+30), posYTextQuadro, ALLEGRO_ALIGN_LEFT, scriptTXT[i]);
@@ -1162,10 +1159,9 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
         //Posicionamento dos tuneis 1, 2 e 3
         if((tunel1.posX<tunel1.largura*-3)&&(tunel2.posX<tunel2.largura*-3)&&(tunel3.posX<tunel3.largura*-3)){
             //Reposicionamento dos Tuneis
-            //(rand() % 4)+ 1;
-            tunel1.posX = (rand() % (TELA_LARGURA + tunel1.largura*2)) + (TELA_LARGURA + tunel1.largura);
-            tunel2.posX = (rand() % (TELA_LARGURA + tunel2.largura*2)) + (TELA_LARGURA + tunel2.largura);
-            tunel3.posX = (rand() % (TELA_LARGURA + tunel3.largura*2)) + (TELA_LARGURA + tunel3.largura);
+            tunel1.posX = (rand() % tunel1.largura) + TELA_LARGURA + tunel1.largura*2;
+            tunel2.posX = (rand() % tunel2.largura) + TELA_LARGURA + tunel2.largura*2;
+            tunel3.posX = (rand() % tunel3.largura) + TELA_LARGURA + tunel3.largura*2;
 
             //Pontuacao:
             if(strcmp(ultChTexto,"ACERTOU!!!")==0){
@@ -1226,13 +1222,14 @@ void telaJogo(){//----------------------------------------------------FUNCAO RES
             passTunel = 0;
         }
 
-        //------------------------------------------------------------CONTROLA TEMPO DE JOGO
+        //------------------------------------------------------------CONTROLES DE TEMPO
+        /*
         //Tempo de duracao do jogo
         if(tempJogo>TEMPO_JOGO_SEGUNDOS*FPS){
             tempTelaFimTempo = 0;
             telaAtual=TELA_FIM_TEMPO;
         }else tempJogo++;
-
+        */
         //Tempo de pisca-Seta(Algoritmo)
         if(seta.temp>FPS/3){
             seta.temp=0;
