@@ -852,7 +852,7 @@ void telaEscolha(){//----------------------------------------------------FUNCAO 
         al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
         al_draw_bitmap(btCarro3.objetoBitmap,btCarro3.posX, btCarro3.posY, 0);
      }else if(mousePosicao(btCenarioEspaco.objetoBitmap,btCenarioEspaco.posX, btCenarioEspaco.posY)){
-        al_draw_bitmap(btCenarioEspaco.objetoBitmap, btCenarioEspaco.posX, btCenarioEspaco.posY, 0);
+        al_draw_bitmap(btCenarioEspaco.objetoBitmap, btCenarioEspaco.posX+15, btCenarioEspaco.posY+5, 0);
         al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
      }else if(mousePosicao(btCenarioCidade.objetoBitmap, btCenarioCidade.posX, btCenarioCidade.posY)){
         al_draw_bitmap(btCenarioCidade.objetoBitmap, btCenarioCidade.posX, btCenarioCidade.posY,0);
@@ -902,7 +902,7 @@ void telaEscolha(){//----------------------------------------------------FUNCAO 
         al_draw_bitmap(btCarro3.objetoBitmap, btCarro3.posX, btCarro3.posY,0);
      }
      if (cenarioClick == 1){
-        al_draw_bitmap(btCenarioEspaco.objetoBitmap, btCenarioEspaco.posX, btCenarioEspaco.posY,0);
+        al_draw_bitmap(btCenarioEspaco.objetoBitmap, btCenarioEspaco.posX+15, btCenarioEspaco.posY+5,0);
      } else if (cenarioClick == 2){
         al_draw_bitmap(btCenarioCidade.objetoBitmap, btCenarioCidade.posX, btCenarioCidade.posY,0);
      }
